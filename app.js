@@ -12,6 +12,9 @@ function _isAdm(v){ return v==='admin bani sebil tegal danas'; }
 var isAdmin=false;
 
 function getPending(){ try{return JSON.parse(localStorage.getItem('ikbas_pending')||'[]');}catch(e){return[];} }
+
+// Global list of current pending items (loaded from GitHub or localStorage)
+var currentPendingList = [];
 function savePending(arr){ localStorage.setItem('ikbas_pending',JSON.stringify(arr)); }
 
 function checkPassword(){
@@ -91,6 +94,7 @@ function openAdminPanel(){
 }
 
 function renderAdminPanel(pending){
+  currentPendingList = pending.slice(); // save globally
   var contentEl=document.getElementById('adminContent');if(!contentEl)return;
   if(!pending.length){
     contentEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--txt2)"><div style="font-size:40px;margin-bottom:12px">OK</div><div style="font-weight:700">Tidak ada permintaan pending</div></div>';
@@ -112,7 +116,7 @@ function renderAdminPanel(pending){
 function closeAdminPanel(){var el=document.getElementById('adminModal');if(el)el.classList.remove('show');}
 
 function approveItem(idx){
-  var pending=getPending();var item=pending[idx];if(!item)return;
+  var pending=currentPendingList;var item=pending[idx];if(!item){showToast('Item tidak ditemukan, refresh panel admin');return;}
   if(item.tipe==='TAMBAH_ANAK'&&item.namaOrangTua){
     var pname=item.namaOrangTua.split(' + ')[0].trim();
     var pnode=allNodes.find(function(n){return n.n.toLowerCase()===pname.toLowerCase();});
@@ -128,17 +132,44 @@ function approveItem(idx){
     var node=allNodes.find(function(n){return n.n===item.namaAsli;});
     if(node){node.n=item.nama;if(item.pasangan)node.s=item.pasangan;layoutTree();render();showToast('Data diupdate!');}
   }
-  pending.splice(idx,1);savePending(pending);
+  pending.splice(idx,1);
+  currentPendingList = pending.slice();
+  savePending(pending);
   removeFromGitHub(item);
+  // Also update GitHub submissions.json
+  updateGitHubSubmissions(pending);
   closeAdminPanel();setTimeout(openAdminPanel,300);
 }
 
 function rejectItem(idx){
   if(!confirm('Tolak permintaan ini?'))return;
-  var pending=getPending();var item=pending[idx];
-  pending.splice(idx,1);savePending(pending);
+  var pending=currentPendingList;var item=pending[idx];
+  pending.splice(idx,1);
+  currentPendingList = pending.slice();
+  savePending(pending);
   removeFromGitHub(item);
+  updateGitHubSubmissions(pending);
   showToast('Permintaan ditolak');closeAdminPanel();setTimeout(openAdminPanel,300);
+}
+
+function updateGitHubSubmissions(newList){
+  var token=GITHUB_TOKEN;
+  if(!token||token.length<20||token.indexOf('BAGIAN')>=0)return;
+  var apiUrl='https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/data/submissions.json';
+  fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){return r.json();})
+  .then(function(fd){
+    return fetch(apiUrl,{method:'PUT',
+      headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:'Admin processed submission',
+        content:btoa(unescape(encodeURIComponent(JSON.stringify(newList,null,2)))),
+        sha:fd.sha
+      })
+    });
+  })
+  .then(function(r){if(r.ok)showToast('GitHub diupdate!');})
+  .catch(function(){});
 }
 
 function removeFromGitHub(item){
