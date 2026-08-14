@@ -2,8 +2,8 @@
 // CONFIG - GANTI DENGAN TOKEN ANDA
 var GITHUB_OWNER = 'MMaulana2405';
 var GITHUB_REPO  = 'bani-sebil';
-var _p1 = 'ghp_cuODWVMdksK3cLC6wS';
-var _p2 = '6ICqAevZfJ761Uo9rS';
+var _p1 = 'BAGIAN_PERTAMA_TOKEN';
+var _p2 = 'BAGIAN_KEDUA_TOKEN';
 var GITHUB_TOKEN = _p1 + _p2;
 
 // PASSWORD
@@ -152,31 +152,47 @@ function rejectItem(idx){
   showToast('Permintaan ditolak');closeAdminPanel();setTimeout(openAdminPanel,300);
 }
 
-function updateGitHubSubmissions(newList){
+function updateGitHubSubmissions(newList, retryCount){
   var token=GITHUB_TOKEN;
   if(!token||token.length<20||token.indexOf('BAGIAN')>=0)return;
+  retryCount = retryCount || 0;
   var apiUrl='https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/data/submissions.json';
-  fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}})
+  // Always get fresh SHA before updating to avoid 409 conflict
+  fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'}})
   .then(function(r){return r.json();})
   .then(function(fd){
+    if(!fd.sha){throw new Error('No SHA found');}
     return fetch(apiUrl,{method:'PUT',
       headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
       body:JSON.stringify({
-        message:'Admin processed submission',
+        message:'Admin: update submissions ['+new Date().toISOString()+']',
         content:btoa(unescape(encodeURIComponent(JSON.stringify(newList,null,2)))),
         sha:fd.sha
       })
     });
   })
-  .then(function(r){if(r.ok)showToast('GitHub diupdate!');})
-  .catch(function(){});
+  .then(function(r){
+    if(r.ok){
+      showToast('Data berhasil diupdate di GitHub!');
+    } else if(r.status===409 && retryCount < 3){
+      // 409 Conflict - retry after delay
+      setTimeout(function(){updateGitHubSubmissions(newList, retryCount+1);}, 1000);
+    } else {
+      r.json().then(function(e){showToast('Gagal update GitHub: '+e.message);});
+    }
+  })
+  .catch(function(e){
+    if(retryCount < 2){
+      setTimeout(function(){updateGitHubSubmissions(newList, retryCount+1);}, 1500);
+    }
+  });
 }
 
 function removeFromGitHub(item){
   var token=GITHUB_TOKEN;
   if(!token||token.length<20||token.indexOf('BAGIAN')>=0)return;
   var apiUrl='https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/data/submissions.json';
-  fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}})
+  fetch(apiUrl+'?t='+Date.now(),{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'}})
   .then(function(r){return r.json();})
   .then(function(fd){
     var cur=[];
@@ -234,9 +250,56 @@ window.addEventListener('mousemove',function(e){if(!dragging)return;vx=dragVX+(e
 window.addEventListener('mouseup',function(){dragging=false;svg.style.cursor='grab';});
 svg.addEventListener('wheel',function(e){e.preventDefault();var rect=svg.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;var f=e.deltaY<0?1.15:0.87,nk=Math.max(0.05,Math.min(3,vk*f));vx=mx-(mx-vx)*(nk/vk);vy=my-(my-vy)*(nk/vk);vk=nk;applyTransform();},{passive:false});
 var lastTD=null,tSX=0,tSY=0,tVX=0,tVY=0;
-svg.addEventListener('touchstart',function(e){if(e.touches.length===1){dragging=true;tSX=e.touches[0].clientX;tSY=e.touches[0].clientY;tVX=vx;tVY=vy;}},{passive:true});
-svg.addEventListener('touchmove',function(e){if(e.touches.length===1&&dragging){vx=tVX+(e.touches[0].clientX-tSX);vy=tVY+(e.touches[0].clientY-tSY);applyTransform();}else if(e.touches.length===2){var dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,dist=Math.sqrt(dx*dx+dy*dy);if(lastTD){vk=Math.max(0.05,Math.min(3,vk*dist/lastTD));applyTransform();}lastTD=dist;}},{passive:true});
-svg.addEventListener('touchend',function(){dragging=false;lastTD=null;});
+svg.addEventListener('touchstart',function(e){
+  if(e.touches.length===1){
+    dragging=true;
+    tSX=e.touches[0].clientX;tSY=e.touches[0].clientY;
+    tVX=vx;tVY=vy;
+    lastTD=null;
+  } else if(e.touches.length===2){
+    dragging=false;
+    var dx=e.touches[0].clientX-e.touches[1].clientX;
+    var dy=e.touches[0].clientY-e.touches[1].clientY;
+    lastTD=Math.sqrt(dx*dx+dy*dy);
+    // Store pinch center
+    var rect=svg.getBoundingClientRect();
+    tSX=(e.touches[0].clientX+e.touches[1].clientX)/2-rect.left;
+    tSY=(e.touches[0].clientY+e.touches[1].clientY)/2-rect.top;
+    tVX=vx;tVY=vy;
+  }
+},{passive:true});
+
+svg.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  if(e.touches.length===1&&dragging){
+    vx=tVX+(e.touches[0].clientX-tSX);
+    vy=tVY+(e.touches[0].clientY-tSY);
+    applyTransform();
+  } else if(e.touches.length===2&&lastTD){
+    var dx=e.touches[0].clientX-e.touches[1].clientX;
+    var dy=e.touches[0].clientY-e.touches[1].clientY;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    var scale=dist/lastTD;
+    var nk=Math.max(0.05,Math.min(3,vk*scale));
+    // Zoom toward pinch center
+    vx=tSX-(tSX-tVX)*(nk/vk);
+    vy=tSY-(tSY-tVY)*(nk/vk);
+    vk=nk;
+    lastTD=dist;
+    tVX=vx;tVY=vy;
+    applyTransform();
+  }
+},{passive:false});
+
+svg.addEventListener('touchend',function(e){
+  if(e.touches.length===0){dragging=false;lastTD=null;}
+  else if(e.touches.length===1){
+    dragging=true;
+    tSX=e.touches[0].clientX;tSY=e.touches[0].clientY;
+    tVX=vx;tVY=vy;
+    lastTD=null;
+  }
+},{passive:true});
 function zoomIn(){var w=svg.clientWidth,h=svg.clientHeight,nk=Math.min(3,vk*1.3);vx=w/2-(w/2-vx)*(nk/vk);vy=h/2-(h/2-vy)*(nk/vk);vk=nk;applyTransform();}
 function zoomOut(){var w=svg.clientWidth,h=svg.clientHeight,nk=Math.max(0.05,vk*0.77);vx=w/2-(w/2-vx)*(nk/vk);vy=h/2-(h/2-vy)*(nk/vk);vk=nk;applyTransform();}
 function resetView(){var pos=posMap[TREE.sebil.id];if(!pos)return;var w=svg.clientWidth,h=svg.clientHeight;vk=0.6;vx=w/2-(pos.x+NW/2)*vk;vy=h/2-(pos.y+NH/2)*vk;applyTransform();}
@@ -299,13 +362,20 @@ function submitForm(){
   var hasToken=token&&token.length>20&&token.indexOf('BAGIAN')<0;
   if(!hasToken){var p=getPending();p.push(payload);savePending(p);btn.innerHTML='Kirim Data';btn.disabled=false;closeModal();showToast('Tersimpan lokal. Isi token GitHub untuk sync online.');return;}
   var apiUrl='https://api.github.com/repos/'+GITHUB_OWNER+'/'+GITHUB_REPO+'/contents/data/submissions.json';
-  fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}})
+  fetch(apiUrl+'?t='+Date.now(),{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Cache-Control':'no-cache'}})
   .then(function(r){return r.json();})
   .then(function(fd){
     var cur=[];
     try{cur=JSON.parse(atob(fd.content.split('\n').join('')));}catch(e){}
     cur.push(payload);
-    return fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Submission: '+nama,content:btoa(unescape(encodeURIComponent(JSON.stringify(cur,null,2)))),sha:fd.sha})});
+    return fetch(apiUrl,{method:'PUT',
+      headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({
+        message:'Submission: '+nama+' ['+new Date().toISOString()+']',
+        content:btoa(unescape(encodeURIComponent(JSON.stringify(cur,null,2)))),
+        sha:fd.sha
+      })
+    });
   })
   .then(function(r){btn.innerHTML='Kirim Data';btn.disabled=false;closeModal();if(r.ok){showToast('Permintaan terkirim ke server!');}else{var p=getPending();p.push(payload);savePending(p);showToast('Gagal kirim ke server. Tersimpan lokal.');}})
   .catch(function(){var p=getPending();p.push(payload);savePending(p);btn.innerHTML='Kirim Data';btn.disabled=false;closeModal();showToast('Tersimpan! Admin akan memverifikasi.');});
