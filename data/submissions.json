@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "tipe": "TAMBAH_ANAK",
+    "nama": "test",
+    "pasangan": "",
+    "jk": "",
+    "tglLahir": "",
+    "tmptLahir": "",
+    "hp": "",
+    "alamat": "",
+    "catatan": "",
+    "namaOrangTua": "M. Maulana I + Hasri Imroatul Izza",
+    "namaAsli": "",
+    "timestamp": "2026-08-14T15:18:42.419Z",
+    "id": "sub_1786720722419"
+  }
+]
