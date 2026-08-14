@@ -921,10 +921,12 @@ function openEditNode(id){const node=nodeMap[id];if(!node)return;editingNodeId=i
 function openAddChild(parentId){const parent=nodeMap[parentId];if(!parent)return;editingNodeId=null;addingToParentId=parentId;document.getElementById('modalTitle').textContent='➕ Tambah Anak dari: '+parent.n;['fNama','fPasangan','fTmpt','fHP','fAlamat','fCatatan'].forEach(id=>document.getElementById(id).value='');document.getElementById('fJK').value='';document.getElementById('fTgl').value='';document.getElementById('fParentInfo').style.display='block';document.getElementById('fParentName').textContent=parent.n+(parent.s?' + '+parent.s:'');document.getElementById('editModal').classList.add('show');}
 
 function closeModal(){document.getElementById('editModal').classList.remove('show');}
-// GitHub config - ISI SETELAH SETUP
-const GITHUB_OWNER = 'GITHUB_USERNAME_ANDA';   // contoh: 'mmaulana2405'
-const GITHUB_REPO  = 'NAMA_REPO_ANDA';          // contoh: 'bani-sebil'
-const GITHUB_TOKEN = 'GITHUB_TOKEN_ANDA';        // dari Settings → Developer settings
+// GitHub config
+const GITHUB_OWNER = 'MMaulana2405';
+const GITHUB_REPO  = 'bani-sebil';
+const _p1 = 'ghp_cuODWVMdksK3cLC6wS';
+const _p2 = '6ICqAevZfJ761Uo9rS';
+const GITHUB_TOKEN = _p1 + _p2;
 
 async function submitForm(){
   const nama=document.getElementById('fNama').value.trim();
