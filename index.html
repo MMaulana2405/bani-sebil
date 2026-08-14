@@ -3,162 +3,272 @@
 <html lang="id">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
 <title>Silsilah Keluarga Besar Bani Sebil</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0f1117;--s1:#1a1d2e;--s2:#252840;--s3:#1e2138;--acc:#f0a500;--txt:#e8e8f0;--txt2:#9999bb;--w0:#e74c3c;--w1:#3498db;--w2:#2ecc71;--anc:#f0a500;--seb:#ff6b35}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px solid var(--acc);padding:9px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:0 3px 16px rgba(0,0,0,.5)}
-.logo{width:40px;height:40px;background:linear-gradient(135deg,var(--acc),#e05c2a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.ht h1{font-size:16px;font-weight:700;background:linear-gradient(90deg,var(--acc),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.ht p{font-size:10px;color:var(--txt2);margin-top:1px}
-.hst{display:flex;gap:8px;margin-left:auto}
-.pill{background:rgba(240,165,0,.12);border:1px solid rgba(240,165,0,.3);border-radius:20px;padding:3px 10px;font-size:11px;display:flex;align-items:center;gap:4px}
-.pill b{color:var(--acc)}
-.tb{background:var(--s1);border-bottom:1px solid rgba(255,255,255,.07);padding:6px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:wrap}
-.sb{position:relative;flex:1;min-width:160px;max-width:320px}
-.sb input{width:100%;background:var(--s2);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:6px 9px 6px 30px;color:var(--txt);font-size:12px;outline:none;transition:border-color .2s}
-.sb input:focus{border-color:var(--acc)}
-.sb .si{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--txt2);font-size:12px;pointer-events:none}
-.sr{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:7px;max-height:220px;overflow-y:auto;z-index:999;display:none}
+:root{
+  --green:#1a7a3c;--green2:#22a050;--green3:#2ecc71;
+  --green-light:#e8f7ee;--green-mid:#c8ecd6;
+  --yellow:#f5c518;--yellow2:#ffd700;--yellow-light:#fffbe6;
+  --bg:#f4faf6;--surface:#ffffff;
+  --glass2:rgba(255,255,255,0.95);
+  --border:rgba(26,122,60,0.12);--border2:rgba(26,122,60,0.22);
+  --txt:#0d2b18;--txt2:#3d6b4f;--txt3:#7aaa8a;
+  --shadow:0 4px 20px rgba(26,122,60,0.10);--shadow2:0 8px 36px rgba(26,122,60,0.15);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* LANDING PAGE */
+#landing{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d3d1e 0%,#1a7a3c 40%,#22a050 70%,#0d3d1e 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0}
+.landing-card{background:rgba(255,255,255,0.97);border-radius:24px;padding:36px 32px;width:100%;max-width:390px;box-shadow:0 32px 80px rgba(0,0,0,0.35);text-align:center;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.landing-logo{width:88px;height:88px;border-radius:50%;border:4px solid var(--green);box-shadow:0 8px 24px rgba(26,122,60,0.25);margin:0 auto 14px;object-fit:cover;display:block}
+.landing-logo-fb{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));border:4px solid var(--yellow);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.landing-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800;color:var(--green);line-height:1.3;margin-bottom:4px}
+.landing-sub{font-size:11px;color:var(--txt2);margin-bottom:6px;font-weight:400}
+.landing-org{display:inline-block;background:var(--green-light);border:1px solid var(--green-mid);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--green);margin-bottom:24px}
+.landing-divider{height:1px;background:var(--green-mid);margin-bottom:20px}
+.landing-label{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-bottom:6px}
+.landing-input-wrap{position:relative;margin-bottom:8px}
+.landing-input{width:100%;background:var(--surface);border:2px solid var(--border2);border-radius:12px;padding:12px 44px 12px 14px;color:var(--txt);font-size:14px;font-weight:500;outline:none;transition:all .2s;font-family:'Inter',sans-serif}
+.landing-input:focus{border-color:var(--green2);box-shadow:0 0 0 4px rgba(34,160,80,0.12)}
+.landing-input.error{border-color:#ef4444}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--txt3);font-size:16px;padding:4px}
+.landing-error{font-size:12px;color:#ef4444;font-weight:600;margin-bottom:12px;text-align:left;display:none}
+.landing-error.show{display:block}
+.landing-btn{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;padding:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;box-shadow:0 4px 16px rgba(26,122,60,0.3);margin-bottom:14px}
+.landing-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(26,122,60,0.4)}
+.landing-hint{font-size:11px;color:var(--txt3);font-weight:500}
+.landing-footer{margin-top:18px;font-size:11px;color:rgba(255,255,255,0.5);font-weight:500}
+
+/* MAIN APP */
+#app{display:flex;flex-direction:column;height:100vh;opacity:0;transition:opacity .4s}
+#app.visible{opacity:1}
+
+/* HEADER */
+header{background:var(--green);padding:0 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:100;box-shadow:0 3px 16px rgba(26,122,60,0.25);height:52px;position:relative}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--yellow),var(--yellow2),var(--yellow))}
+.logo-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;min-width:0}
+.header-logo{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);box-shadow:0 2px 8px rgba(0,0,0,0.2);flex-shrink:0;object-fit:cover}
+.ht{min-width:0}
+.ht h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:-0.2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ht p{font-size:9px;color:rgba(255,255,255,0.65);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hst{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
+.pill{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;color:rgba(255,255,255,0.9)}
+.pill b{color:var(--yellow);font-weight:800}
+.logout-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;color:rgba(255,255,255,0.9);padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;flex-shrink:0;display:flex;align-items:center;gap:4px}
+.logout-btn:hover{background:rgba(255,255,255,0.25)}
+@media(max-width:600px){.hst{display:none}.ht p{display:none}}
+
+/* TOOLBAR */
+.tb{background:var(--glass2);border-bottom:2px solid var(--green-mid);padding:6px 10px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;box-shadow:0 2px 8px rgba(26,122,60,0.06)}
+.sb{position:relative;flex:1;min-width:140px;max-width:280px}
+.sb input{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:9px;padding:6px 9px 6px 30px;color:var(--txt);font-size:12px;outline:none;transition:all .2s;font-family:'Inter',sans-serif}
+.sb input:focus{border-color:var(--green2);box-shadow:0 0 0 3px rgba(34,160,80,0.1)}
+.sb input::placeholder{color:var(--txt3)}
+.sb .si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--txt3);pointer-events:none;font-size:12px}
+.sr{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--glass2);border:1.5px solid var(--border2);border-radius:9px;max-height:200px;overflow-y:auto;z-index:999;display:none;box-shadow:var(--shadow2)}
 .sr.show{display:block}
-.sri{padding:7px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s}
-.sri:hover{background:rgba(240,165,0,.15)}
-.sri .gb{font-size:10px;color:var(--txt2);background:rgba(255,255,255,.08);border-radius:4px;padding:1px 5px;margin-left:4px}
-.btn{background:var(--s2);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--txt);padding:5px 11px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;white-space:nowrap;font-family:inherit}
-.btn:hover{background:rgba(240,165,0,.2);border-color:var(--acc)}
-.vtog{display:flex;gap:2px;background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:2px}
-.vb{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;color:var(--txt2);transition:all .2s;border:none;background:none;font-family:inherit}
-.vb.on{background:var(--acc);color:#000;font-weight:600}
-.main{display:flex;flex:1;overflow:hidden}
-.side{width:240px;background:var(--s1);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s;overflow:hidden}
+.sri{padding:7px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);transition:background .15s;color:var(--txt)}
+.sri:hover{background:var(--green-light)}
+.sri .gb{font-size:10px;color:var(--txt3);background:var(--green-light);border-radius:4px;padding:1px 5px;margin-left:4px}
+.btn{background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;color:var(--txt2);padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;white-space:nowrap;font-family:'Inter',sans-serif;box-shadow:0 1px 4px rgba(26,122,60,0.06)}
+.btn:hover{background:var(--green-light);border-color:var(--green2);color:var(--green)}
+.vtog{display:flex;gap:2px;background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;padding:2px;box-shadow:0 1px 4px rgba(26,122,60,0.06)}
+.vb{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;color:var(--txt2);transition:all .2s;border:none;background:none;font-family:'Inter',sans-serif}
+.vb.on{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,122,60,0.3)}
+@media(max-width:600px){.btn-hide-mobile{display:none}.sb{max-width:none;flex:1}}
+
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden;position:relative;z-index:1}
+
+/* SIDEBAR */
+.side{width:240px;background:var(--glass2);border-right:2px solid var(--green-mid);display:flex;flex-direction:column;flex-shrink:0;transition:width .3s;overflow:hidden}
 .side.off{width:0}
-.sh{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px;font-weight:600;color:var(--acc);flex-shrink:0}
+.sh{padding:10px 12px;border-bottom:1px solid var(--green-mid);font-size:12px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--green-light);font-family:'Plus Jakarta Sans',sans-serif}
 .bl{overflow-y:auto;flex:1;padding:5px}
-.bi{padding:8px 10px;border-radius:7px;cursor:pointer;margin-bottom:2px;transition:all .2s;border:1px solid transparent}
-.bi:hover{background:rgba(255,255,255,.05)}
-.bi.on{background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.3)}
-.bn{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
-.bm{font-size:10px;color:var(--txt2);margin-top:2px}
+.bi{padding:8px 10px;border-radius:9px;cursor:pointer;margin-bottom:2px;transition:all .2s;border:1.5px solid transparent}
+.bi:hover{background:var(--green-light);border-color:var(--border2)}
+.bi.on{background:var(--green-light);border-color:var(--green2)}
+.bn{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;color:var(--txt)}
+.bm{font-size:10px;color:var(--txt2);margin-top:2px;font-weight:500}
 .bd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.cwrap{flex:1;position:relative;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#1a1d2e 0%,#0f1117 100%)}
-#tsvg{width:100%;height:100%;display:block;cursor:grab}
+@media(max-width:768px){.side{position:absolute;top:0;bottom:0;left:0;z-index:50;width:240px;box-shadow:4px 0 20px rgba(0,0,0,0.15)}.side.off{width:0;box-shadow:none}}
+
+/* CANVAS */
+.cwrap{flex:1;position:relative;overflow:hidden;background:transparent}
+#tsvg{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
 #tsvg:active{cursor:grabbing}
-.relbox{position:absolute;top:14px;left:14px;width:270px;background:var(--s2);border:1px solid rgba(100,180,255,.35);border-radius:12px;padding:14px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none;max-height:calc(100vh - 180px);overflow-y:auto}
-.relbox.show{display:block}
-.relbox h3{font-size:13px;font-weight:700;color:#64b4ff;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.relslot{background:var(--s3);border:1.5px dashed rgba(255,255,255,.2);border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:all .2s;min-height:40px}
-.relslot:hover{border-color:#64b4ff}
-.relslot.active{border-color:#64b4ff;border-style:solid;background:rgba(100,180,255,.08)}
-.relslot.filled{border-style:solid;border-color:rgba(100,180,255,.4)}
-.slot-label{font-size:10px;color:var(--txt2);margin-bottom:2px}
-.slot-name{font-size:12px;font-weight:600}
-.relresult{background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.25);border-radius:8px;padding:10px;margin-top:8px;display:none}
-.relresult.show{display:block}
-.rel-main{font-size:15px;font-weight:700;color:#64b4ff;text-align:center;margin-bottom:6px}
-.rel-seniority{font-size:12px;color:#aaddff;background:rgba(100,180,255,.1);border-radius:6px;padding:7px 9px;margin-bottom:6px;line-height:1.6;white-space:pre-line}
-.rel-desc{font-size:11px;color:var(--txt2);text-align:center;margin-bottom:4px}
-.rel-path{font-size:10px;color:var(--txt2);padding-top:6px;border-top:1px solid rgba(255,255,255,.08);white-space:pre-line;line-height:1.6}
-.relbtn{display:flex;gap:6px;margin-top:8px}
-.relbtn button{flex:1;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.3);border-radius:6px;color:#64b4ff;padding:5px;font-size:11px;cursor:pointer;transition:all .2s;font-family:inherit}
-.relbtn button:hover{background:rgba(100,180,255,.25)}
-.zc{position:absolute;bottom:20px;right:20px;display:flex;flex-direction:column;gap:5px;z-index:10}
-.zb{width:34px;height:34px;background:var(--s2);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--txt);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit}
-.zb:hover{background:rgba(240,165,0,.2);border-color:var(--acc)}
-.ip{position:absolute;top:14px;right:14px;width:290px;background:var(--s2);border:1px solid rgba(240,165,0,.35);border-radius:12px;padding:15px;display:none;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:sli .18s ease;max-height:calc(100vh - 200px);overflow-y:auto}
+
+/* ZOOM */
+.zc{position:absolute;bottom:16px;right:12px;display:flex;flex-direction:column;gap:4px;z-index:10}
+.zb{width:34px;height:34px;background:var(--glass2);border:1.5px solid var(--border2);border-radius:9px;color:var(--txt2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Inter',sans-serif;box-shadow:var(--shadow)}
+.zb:hover{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* INFO PANEL */
+.ip{position:absolute;top:10px;right:10px;width:280px;background:var(--glass2);border:1.5px solid var(--border2);border-radius:14px;padding:14px;display:none;z-index:200;box-shadow:var(--shadow2);animation:slideIn .2s ease;max-height:calc(100vh - 160px);overflow-y:auto}
 .ip.show{display:block}
-@keyframes sli{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
-.ic{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--txt2);font-size:17px;cursor:pointer;font-family:inherit}
-.ic:hover{color:var(--txt)}
-.igb{display:inline-block;background:rgba(240,165,0,.2);border:1px solid rgba(240,165,0,.4);border-radius:20px;padding:2px 10px;font-size:10px;color:var(--acc);margin-bottom:7px}
-.iname{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:3px}
-.isp{font-size:12px;color:var(--txt2);margin-bottom:8px}
-.isp span{color:#e88}
-.idv{height:1px;background:rgba(255,255,255,.08);margin:8px 0}
+@keyframes slideIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.panel-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.panel-close{background:var(--green-light);border:1px solid var(--border2);color:var(--green);font-size:13px;cursor:pointer;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .2s;font-family:'Inter',sans-serif;flex-shrink:0}
+.panel-close:hover{background:var(--green);color:#fff}
+.igb{display:inline-block;background:var(--green-light);border:1px solid var(--green-mid);border-radius:20px;padding:2px 9px;font-size:10px;color:var(--green);margin-bottom:6px;font-weight:700}
+.iname{font-size:15px;font-weight:800;line-height:1.3;margin-bottom:3px;color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif}
+.isp{font-size:11px;color:var(--txt2);margin-bottom:8px;font-weight:500}
+.isp span{color:var(--green2);font-weight:700}
+.idv{height:1.5px;background:var(--green-mid);margin:8px 0}
 .ir{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
-.ir .l{color:var(--txt2)}.ir .v{color:var(--txt);font-weight:500;text-align:right;max-width:58%}
-.icl{margin-top:6px;max-height:140px;overflow-y:auto}
-.ici{font-size:11px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:4px}
-.ici:hover{background:rgba(240,165,0,.12)}
-.ici::before{content:'↳';color:var(--txt2);font-size:10px}
-.inote{font-size:10px;color:var(--txt2);background:rgba(255,255,255,.04);border-radius:5px;padding:5px 7px;margin-top:6px;font-style:italic}
-.leg{position:absolute;bottom:16px;left:16px;background:rgba(26,29,46,.95);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 12px;font-size:10px;z-index:10}
-.lt{color:var(--txt2);margin-bottom:4px;font-weight:600}
-.li{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-#lv{display:none;flex:1;overflow-y:auto;padding:16px}
+.ir .l{color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.3px;font-size:10px}
+.ir .v{color:var(--txt);font-weight:700;text-align:right;max-width:58%}
+.icl{margin-top:6px;max-height:120px;overflow-y:auto}
+.ici{font-size:11px;padding:4px 8px;border-radius:7px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;color:var(--txt2);font-weight:500}
+.ici:hover{background:var(--green-light);color:var(--green)}
+.ici::before{content:'↳';color:var(--txt3);font-size:10px}
+.inote{font-size:10px;color:var(--txt2);background:var(--yellow-light);border:1px solid rgba(245,197,24,0.3);border-radius:7px;padding:5px 8px;margin-top:6px;font-weight:500}
+@media(max-width:600px){.ip{width:calc(100vw - 20px);right:10px;top:10px}}
+
+/* RELATION BOX */
+.relbox{position:absolute;top:10px;left:10px;width:262px;background:var(--glass2);border:1.5px solid var(--border2);border-radius:14px;padding:13px;z-index:200;box-shadow:var(--shadow2);display:none;max-height:calc(100vh - 160px);overflow-y:auto}
+.relbox.show{display:block}
+.relbox-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.relbox h3{font-size:12px;font-weight:800;color:var(--green);font-family:'Plus Jakarta Sans',sans-serif}
+.relbox-close{background:var(--green-light);border:1px solid var(--border2);color:var(--green);font-size:13px;cursor:pointer;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .2s;font-family:'Inter',sans-serif;flex-shrink:0}
+.relbox-close:hover{background:var(--green);color:#fff}
+.relslot{background:var(--green-light);border:1.5px dashed var(--green-mid);border-radius:9px;padding:8px 10px;margin-bottom:5px;cursor:pointer;transition:all .2s;min-height:40px}
+.relslot:hover{border-color:var(--green2)}
+.relslot.active{border-color:var(--green2);border-style:solid;background:rgba(34,160,80,0.08)}
+.relslot.filled{border-style:solid;border-color:var(--green2)}
+.slot-label{font-size:9px;color:var(--txt3);margin-bottom:2px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.slot-name{font-size:11px;font-weight:700;color:var(--txt)}
+.relresult{background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:9px;padding:10px;margin-top:7px;display:none}
+.relresult.show{display:block}
+.rel-main{font-size:13px;font-weight:800;color:var(--green);text-align:center;margin-bottom:6px;font-family:'Plus Jakarta Sans',sans-serif}
+.rel-seniority{font-size:11px;color:var(--green);background:rgba(34,160,80,0.08);border:1px solid var(--green-mid);border-radius:7px;padding:7px 9px;margin-bottom:5px;line-height:1.6;white-space:pre-line;font-weight:500}
+.rel-desc{font-size:11px;color:var(--txt2);text-align:center;margin-bottom:3px;font-weight:500}
+.rel-path{font-size:10px;color:var(--txt3);padding-top:5px;border-top:1px solid var(--green-mid);white-space:pre-line;line-height:1.6;font-weight:500}
+.relbtn{display:flex;gap:5px;margin-top:7px}
+.relbtn button{flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:7px;color:var(--txt2);padding:5px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.relbtn button:hover{background:var(--green-light);border-color:var(--green2);color:var(--green)}
+@media(max-width:600px){.relbox{width:calc(100vw - 20px)}}
+
+/* LEGEND */
+.leg{position:absolute;bottom:12px;left:12px;background:var(--glass2);border:1.5px solid var(--border2);border-radius:11px;padding:8px 12px;font-size:10px;z-index:10;box-shadow:var(--shadow);max-width:180px}
+.lt{color:var(--txt3);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.li{display:flex;align-items:center;gap:6px;margin-top:3px;color:var(--txt2);font-weight:600}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.leg-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px}
+
+/* LIST VIEW */
+#lv{display:none;flex:1;overflow-y:auto;padding:14px;background:transparent}
 #lv.show{display:block}
-.lgs{margin-bottom:20px}
-.lgt{font-size:13px;font-weight:700;color:var(--acc);border-bottom:1px solid rgba(240,165,0,.3);padding-bottom:4px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.lgc{font-size:10px;color:var(--txt2);background:rgba(255,255,255,.08);border-radius:10px;padding:1px 7px}
-.lgr{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
-.lc{background:var(--s2);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:8px 10px;cursor:pointer;transition:all .2s}
-.lc:hover{border-color:var(--acc);background:rgba(240,165,0,.07)}
-.lcn{font-size:12px;font-weight:600}
-.lcs{font-size:10px;color:var(--txt2);margin-top:1px}
-.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid rgba(240,165,0,.4);border-radius:7px;padding:6px 14px;font-size:12px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+.lgs{margin-bottom:18px}
+.lgt{font-size:12px;font-weight:800;color:var(--green);border-bottom:2px solid var(--green-mid);padding-bottom:5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif}
+.lgc{font-size:10px;color:var(--txt3);background:var(--green-light);border-radius:10px;padding:1px 7px;font-weight:700}
+.lgr{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.lc{background:var(--glass2);border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;cursor:pointer;transition:all .2s}
+.lc:hover{border-color:var(--green2);background:var(--green-light)}
+.lcn{font-size:12px;font-weight:700;color:var(--txt)}
+.lcs{font-size:10px;color:var(--txt2);margin-top:2px;font-weight:500}
 
 /* EDIT MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(13,43,24,0.5);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
-.modal{background:var(--s2);border:1px solid rgba(240,165,0,.4);border-radius:14px;padding:20px;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.7);animation:sli .2s ease}
-.modal h3{font-size:15px;font-weight:700;color:var(--acc);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.form-row{margin-bottom:12px}
-.form-row label{display:block;font-size:11px;color:var(--txt2);margin-bottom:4px;font-weight:600}
-.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--s3);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:8px 10px;color:var(--txt);font-size:12px;outline:none;font-family:inherit;transition:border-color .2s}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--acc)}
-.form-row textarea{resize:vertical;min-height:60px}
-.form-row select option{background:var(--s2)}
-.form-hint{font-size:10px;color:var(--txt2);margin-top:3px;font-style:italic}
-.modal-btns{display:flex;gap:8px;margin-top:16px}
-.modal-btns button{flex:1;padding:9px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
-.btn-save{background:var(--acc);border:none;color:#000}
-.btn-save:hover{background:#e09400}
-.btn-cancel{background:var(--s3);border:1px solid rgba(255,255,255,.15);color:var(--txt)}
-.btn-cancel:hover{border-color:var(--acc)}
-.btn-add-child{background:rgba(100,180,255,.15);border:1px solid rgba(100,180,255,.3);color:#64b4ff}
-.btn-add-child:hover{background:rgba(100,180,255,.3)}
-.edit-badge{display:inline-block;background:rgba(240,165,0,.15);border:1px solid rgba(240,165,0,.3);border-radius:5px;padding:2px 8px;font-size:10px;color:var(--acc);cursor:pointer;margin-left:6px;transition:all .2s}
-.edit-badge:hover{background:rgba(240,165,0,.3)}
-.unsaved-dot{width:8px;height:8px;background:#f0a500;border-radius:50%;display:inline-block;margin-left:4px;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.export-bar{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid rgba(240,165,0,.3);padding:8px 16px;display:none;align-items:center;gap:10px;z-index:500;font-size:12px}
-.export-bar.show{display:flex}
+.modal{background:var(--glass2);border:1.5px solid var(--border2);border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(26,122,60,0.2);animation:slideIn .2s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal h3{font-size:14px;font-weight:800;color:var(--green);font-family:'Plus Jakarta Sans',sans-serif}
+.modal-close{background:var(--green-light);border:1px solid var(--border2);color:var(--green);font-size:15px;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .2s;font-family:'Inter',sans-serif;flex-shrink:0}
+.modal-close:hover{background:var(--green);color:#fff}
+.form-row{margin-bottom:10px}
+.form-row label{display:block;font-size:10px;color:var(--txt2);margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:9px;padding:8px 10px;color:var(--txt);font-size:12px;outline:none;font-family:'Inter',sans-serif;transition:all .2s;font-weight:500}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green2);box-shadow:0 0 0 3px rgba(34,160,80,0.1)}
+.form-row textarea{resize:vertical;min-height:55px}
+.modal-btns{display:flex;gap:7px;margin-top:14px}
+.modal-btns button{flex:1;padding:10px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-save{background:var(--green);border:none;color:#fff;box-shadow:0 4px 12px rgba(26,122,60,0.3)}
+.btn-save:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-cancel{background:var(--surface);border:1.5px solid var(--border2);color:var(--txt2)}
+.btn-cancel:hover{border-color:var(--green2);color:var(--green)}
+
+/* ADMIN MODAL */
+.admin-overlay{position:fixed;inset:0;background:rgba(13,43,24,0.5);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:60px 16px 16px}
+.admin-overlay.show{display:flex}
+.admin-modal{background:var(--glass2);border:1.5px solid var(--border2);border-radius:16px;padding:20px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(26,122,60,0.2);animation:slideIn .2s ease}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.admin-header h3{font-size:14px;font-weight:800;color:var(--green);font-family:'Plus Jakarta Sans',sans-serif}
+
+/* SPINNER */
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--green);border-radius:9px;padding:7px 16px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;color:#fff;box-shadow:var(--shadow2);max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+/* DOTS PATTERN */
+.cwrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(26,122,60,0.1) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--green-mid);border-radius:2px}
 </style>
 </head>
 <body>
+<!-- LANDING PAGE -->
+<div id="landing">
+<div class="landing-card">
+<img alt="Logo IKBAS" class="landing-logo" onerror="this.style.display='none';document.getElementById('logoFb').style.display='flex'" src="logo-ikbas.png?expires=1789309930&amp;signature=37804a38c70ab805a48b3d494269c9b0a338a8cffabdb558e29477ee892a7969&amp;kid=prod-250922"/>
+<div class="landing-logo-fb" id="logoFb" style="display:none">🌳</div>
+<div class="landing-title">Silsilah Keluarga Besar<br/>Bani Sebil</div>
+<div class="landing-sub">Kp. Sukapura · Kec. Sukaraja · Kab. Tasikmalaya</div>
+<div class="landing-org">IKBAS — Ikatan Keluarga Besar Bani Sebil</div>
+<div class="landing-divider"></div>
+<div class="landing-label">Masukkan Kata Sandi</div>
+<div class="landing-input-wrap">
+<input autocomplete="current-password" class="landing-input" id="pwInput" onkeydown="if(event.key==='Enter'){event.preventDefault();checkPassword();}" placeholder="Kata sandi..." type="password"/>
+<button class="toggle-pw" id="togglePwBtn" onclick="togglePw()" type="button">👁</button>
+</div>
+<div class="landing-error" id="pwError">❌ Kata sandi salah. Coba lagi.</div>
+<button class="landing-btn" onclick="checkPassword()" type="button">Masuk ke Silsilah →</button>
+<div class="landing-hint">Hubungi admin keluarga untuk mendapatkan kata sandi</div>
+</div>
+<div class="landing-footer">© IKBAS — Ikatan Keluarga Besar Bani Sebil</div>
+</div>
+<!-- MAIN APP -->
+<div id="app">
 <header>
-<div class="logo">🌳</div>
+<div class="logo-wrap">
+<img alt="Logo IKBAS" class="header-logo" onerror="this.style.display='none'" src="logo-ikbas.png?expires=1789309930&amp;signature=37804a38c70ab805a48b3d494269c9b0a338a8cffabdb558e29477ee892a7969&amp;kid=prod-250922"/>
 <div class="ht">
 <h1>Silsilah Keluarga Besar Bani Sebil</h1>
-<p>Kp. Sukapura, Desa Sukapura, Kec. Sukaraja, Kab. Tasikmalaya, Jawa Barat</p>
+<p>Kp. Sukapura · Desa Sukapura · Kec. Sukaraja · Kab. Tasikmalaya · Jawa Barat</p>
+</div>
 </div>
 <div class="hst">
 <div class="pill">👥 <b id="stot">0</b> Anggota</div>
 <div class="pill">🌿 <b id="sgen">0</b> Generasi</div>
 <div class="pill">🌿 <b>12</b> Cabang</div>
 </div>
+<button class="logout-btn" onclick="logout()">← Keluar</button>
 </header>
 <div class="tb">
 <div class="sb">
 <span class="si">🔍</span>
-<input id="si" placeholder="Cari nama anggota keluarga..." type="text"/>
+<input id="si" placeholder="Cari nama..." type="text"/>
 <div class="sr" id="sr"></div>
 </div>
 <div class="vtog">
 <button class="vb on" id="btree" onclick="setView('tree')">🌳 Pohon</button>
 <button class="vb" id="blist" onclick="setView('list')">📋 Daftar</button>
 </div>
-<button class="btn" onclick="resetView()">🎯 Reset</button>
-<button class="btn" onclick="toggleSide()">☰ Cabang</button>
-<button class="btn" onclick="expandAll()">⊞ Buka Semua</button>
-<button class="btn" onclick="collapseAll()">⊟ Lipat</button>
-<button class="btn" onclick="toggleRelCalc()" style="border-color:rgba(100,180,255,.4);color:#64b4ff">🔗 Hubungan</button>
+<button class="btn btn-hide-mobile" onclick="resetView()">🎯</button>
+<button class="btn" onclick="toggleSide()">☰</button>
+<button class="btn btn-hide-mobile" onclick="expandAll()">⊞</button>
+<button class="btn btn-hide-mobile" onclick="collapseAll()">⊟</button>
+<button class="btn" onclick="toggleRelCalc()" style="border-color:rgba(26,122,60,0.3);color:var(--green);background:var(--green-light)">🔗</button>
+<button class="btn" onclick="exportToCSV()" style="border-color:rgba(59,130,246,0.3);color:#1d4ed8;background:#eff6ff">📥</button>
 </div>
 <div class="main">
 <div class="side" id="side">
@@ -166,26 +276,28 @@ header{background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px 
 <div class="bl" id="bl"></div>
 </div>
 <div class="cwrap" id="cwrap">
-<svg id="tsvg" xmlns="http://www.w3.org/2000/svg">
+<svg id="tsvg" style="position:relative;z-index:1" xmlns="http://www.w3.org/2000/svg">
 <defs>
-<pattern height="40" id="grid" patternunits="userSpaceOnUse" width="40">
-<path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"></path>
-</pattern>
+<filter id="cardshadow"><fedropshadow dx="0" dy="3" flood-color="rgba(26,122,60,0.12)" stddeviation="5"></fedropshadow></filter>
+<filter id="glow"><fegaussianblur result="cb" stddeviation="3"></fegaussianblur><femerge><femergenode in="cb"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter>
 </defs>
-<rect fill="url(#grid)" height="100%" width="100%"></rect>
 <g id="mainG"></g>
 </svg>
+<!-- Relation Calculator -->
 <div class="relbox" id="relbox">
+<div class="relbox-header">
 <h3>🔗 Kalkulator Hubungan</h3>
-<div style="font-size:10px;color:var(--txt2);margin-bottom:8px">Klik node di pohon untuk memilih orang</div>
-<div class="relslot active" id="slot1" onclick="setActiveSlot(1)">
-<div class="slot-label">👤 Orang Pertama</div>
-<div class="slot-name" id="slot1name" style="color:var(--txt2);font-style:italic">Belum dipilih — klik node</div>
+<button class="relbox-close" onclick="toggleRelCalc()">✕</button>
 </div>
-<div style="text-align:center;font-size:14px;color:var(--txt2);margin:2px 0">↕</div>
+<div style="font-size:10px;color:var(--txt3);margin-bottom:8px;font-weight:600">Klik node di pohon untuk memilih</div>
+<div class="relslot active" id="slot1" onclick="setActiveSlot(1)">
+<div class="slot-label">Orang Pertama</div>
+<div class="slot-name" id="slot1name" style="color:var(--txt3);font-style:italic;font-weight:400">Belum dipilih</div>
+</div>
+<div style="text-align:center;font-size:16px;color:var(--txt3);margin:2px 0;line-height:1">⇅</div>
 <div class="relslot" id="slot2" onclick="setActiveSlot(2)">
-<div class="slot-label">👤 Orang Kedua</div>
-<div class="slot-name" id="slot2name" style="color:var(--txt2);font-style:italic">Belum dipilih — klik node</div>
+<div class="slot-label">Orang Kedua</div>
+<div class="slot-name" id="slot2name" style="color:var(--txt3);font-style:italic;font-weight:400">Belum dipilih</div>
 </div>
 <div class="relresult" id="relresult">
 <div class="rel-main" id="rel-main"></div>
@@ -193,139 +305,81 @@ header{background:linear-gradient(135deg,var(--s1),var(--s2));border-bottom:2px 
 <div class="rel-desc" id="rel-desc"></div>
 <div class="rel-path" id="rel-path"></div>
 </div>
-<div class="relbtn">
-<button onclick="clearRelCalc()">🗑 Reset</button>
-<button onclick="toggleRelCalc()">✕ Tutup</button>
+<div class="relbtn"><button onclick="clearRelCalc()">↺ Reset</button></div>
 </div>
-</div>
+<!-- Zoom -->
 <div class="zc">
 <button class="zb" onclick="zoomIn()">+</button>
 <button class="zb" onclick="zoomOut()">−</button>
 <button class="zb" onclick="resetView()">⌂</button>
 </div>
+<!-- Info Panel -->
 <div class="ip" id="ip">
-<button class="ic" onclick="closeInfo()">✕</button>
+<div class="panel-header">
+<div></div>
+<button class="panel-close" onclick="closeInfo()">✕</button>
+</div>
 <div id="ipc"></div>
 </div>
+<!-- Legend -->
 <div class="leg">
+<div class="leg-toggle" onclick="toggleLegend()">
 <div class="lt">Keterangan</div>
-<div class="li"><div class="ld" style="background:#f0a500"></div>Leluhur / Bapak Sebil</div>
-<div class="li"><div class="ld" style="background:#e74c3c"></div>Istri 1: Ma Jangkung</div>
-<div class="li"><div class="ld" style="background:#3498db"></div>Istri 2: Ma Hideung</div>
-<div class="li"><div class="ld" style="background:#2ecc71"></div>Istri 3: Ma Aeni</div>
-<div class="li" style="margin-top:4px;color:var(--txt2)">Klik=detail · Dbl-klik=buka/lipat</div>
+<span id="legToggle" style="font-size:10px;color:var(--txt3);font-weight:700">▲</span>
+</div>
+<div id="legContent">
+<div class="li"><div class="ld" style="background:#f59e0b"></div>Leluhur / Bapak Sebil</div>
+<div class="li"><div class="ld" style="background:#ef4444"></div>Istri 1: Ma Jangkung</div>
+<div class="li"><div class="ld" style="background:#3b82f6"></div>Istri 2: Ma Hideung</div>
+<div class="li"><div class="ld" style="background:#10b981"></div>Istri 3: Ma Aeni</div>
+<div class="li" style="margin-top:4px;color:var(--txt3);font-size:9px;font-weight:600">Klik=detail · Dbl-klik=buka/lipat</div>
+</div>
 </div>
 </div>
 <div id="lv"></div>
 </div>
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+<div class="modal">
+<div class="modal-header">
+<h3 id="modalTitle">✏️ Edit / Tambah Data</h3>
+<button class="modal-close" onclick="closeModal()">✕</button>
+</div>
+<div class="form-row"><label>Nama Lengkap *</label><input id="fNama" placeholder="Nama lengkap" type="text"/></div>
+<div class="form-row"><label>Nama Pasangan</label><input id="fPasangan" placeholder="Nama suami/istri" type="text"/></div>
+<div class="form-row"><label>Jenis Kelamin</label>
+<select id="fJK"><option value="">-- Pilih --</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+</div>
+<div class="form-row"><label>Tanggal Lahir</label><input id="fTgl" type="date"/></div>
+<div class="form-row"><label>Tempat Lahir</label><input id="fTmpt" placeholder="Kota/kabupaten" type="text"/></div>
+<div class="form-row"><label>Nomor HP / WhatsApp</label><input id="fHP" placeholder="08xxxxxxxxxx" type="text"/></div>
+<div class="form-row"><label>Alamat Tinggal</label><input id="fAlamat" placeholder="Kota tempat tinggal sekarang" type="text"/></div>
+<div class="form-row"><label>Catatan</label><textarea id="fCatatan" placeholder="Pekerjaan, info lain..."></textarea></div>
+<div id="fParentInfo" style="font-size:11px;color:var(--txt2);background:var(--green-light);border:1px solid var(--green-mid);border-radius:8px;padding:8px;margin-bottom:9px;display:none;font-weight:500">
+      Orang Tua: <b id="fParentName" style="color:var(--green)"></b>
+</div>
+<div style="font-size:11px;color:var(--green);background:var(--green-light);border:1px solid var(--green-mid);border-radius:8px;padding:8px;margin-bottom:9px;font-weight:500">
+      📤 Data akan dikirim ke admin untuk diverifikasi sebelum tampil di pohon.
+    </div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeModal()">Batal</button>
+<button class="btn-save" id="btnSubmit" onclick="submitForm()">📤 Kirim Data</button>
+</div>
+</div>
+</div>
+<!-- Admin Modal -->
+<div class="admin-overlay" id="adminModal">
+<div class="admin-modal">
+<div class="admin-header">
+<h3>🔑 Panel Admin — Permintaan Masuk</h3>
+<button class="modal-close" onclick="closeAdminPanel()">✕</button>
+</div>
+<div id="adminContent"></div>
+</div>
+</div>
 <div class="toast" id="toast"></div>
+</div><!-- end #app -->
 <script src="tree.js"></script>
 <script src="app.js"></script>
-
-
-<!-- EDIT MODAL -->
-<div class="modal-overlay" id="editModal">
-  <div class="modal">
-    <h3 id="modalTitle">✏️ Edit Data Anggota</h3>
-    <div class="form-row">
-      <label>Nama Lengkap *</label>
-      <input type="text" id="editNama" placeholder="Nama lengkap">
-    </div>
-    <div class="form-row">
-      <label>Nama Pasangan</label>
-      <input type="text" id="editPasangan" placeholder="Nama suami/istri (kosongkan jika belum)">
-    </div>
-    <div class="form-row">
-      <label>Jenis Kelamin</label>
-      <select id="editJK">
-        <option value="">-- Pilih --</option>
-        <option value="L">Laki-laki</option>
-        <option value="P">Perempuan</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>Tanggal Lahir</label>
-      <input type="date" id="editTglLahir">
-    </div>
-    <div class="form-row">
-      <label>Tempat Lahir</label>
-      <input type="text" id="editTmptLahir" placeholder="Kota/kabupaten">
-    </div>
-    <div class="form-row">
-      <label>Nomor HP / WhatsApp</label>
-      <input type="text" id="editHP" placeholder="08xxxxxxxxxx">
-    </div>
-    <div class="form-row">
-      <label>Alamat Tinggal</label>
-      <input type="text" id="editAlamat" placeholder="Kota/kabupaten tempat tinggal sekarang">
-    </div>
-    <div class="form-row">
-      <label>Catatan / Info Tambahan</label>
-      <textarea id="editCatatan" placeholder="Pekerjaan, info lain, dll..."></textarea>
-    </div>
-    <div id="editParentInfo" style="font-size:11px;color:var(--txt2);background:rgba(255,255,255,.04);border-radius:6px;padding:8px;margin-bottom:8px;display:none">
-      <b>Orang Tua:</b> <span id="editParentName"></span>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">✕ Batal</button>
-      <button class="btn-save" onclick="saveEdit()">💾 Simpan</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD MEMBER MODAL -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal">
-    <h3>➕ Tambah Anggota Baru</h3>
-    <div style="font-size:11px;color:var(--txt2);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.2);border-radius:6px;padding:8px;margin-bottom:12px">
-      Anggota baru akan ditambahkan sebagai anak dari: <b id="addParentName" style="color:#64b4ff"></b>
-    </div>
-    <div class="form-row">
-      <label>Nama Lengkap *</label>
-      <input type="text" id="addNama" placeholder="Nama lengkap">
-    </div>
-    <div class="form-row">
-      <label>Nama Pasangan</label>
-      <input type="text" id="addPasangan" placeholder="Nama suami/istri (opsional)">
-    </div>
-    <div class="form-row">
-      <label>Jenis Kelamin</label>
-      <select id="addJK">
-        <option value="">-- Pilih --</option>
-        <option value="L">Laki-laki</option>
-        <option value="P">Perempuan</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>Tanggal Lahir</label>
-      <input type="date" id="addTglLahir">
-    </div>
-    <div class="form-row">
-      <label>Tempat Lahir</label>
-      <input type="text" id="addTmptLahir" placeholder="Kota/kabupaten">
-    </div>
-    <div class="form-row">
-      <label>Nomor HP / WhatsApp</label>
-      <input type="text" id="addHP" placeholder="08xxxxxxxxxx">
-    </div>
-    <div class="form-row">
-      <label>Catatan</label>
-      <textarea id="addCatatan" placeholder="Info tambahan..."></textarea>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeAddModal()">✕ Batal</button>
-      <button class="btn-save" onclick="saveAdd()">➕ Tambah</button>
-    </div>
-  </div>
-</div>
-
-<!-- EXPORT BAR -->
-<div class="export-bar" id="exportBar">
-  <span class="unsaved-dot"></span>
-  <span id="exportMsg">Ada perubahan yang belum disimpan</span>
-  <button class="btn" onclick="exportCSV()" style="margin-left:auto;background:rgba(100,180,255,.15);border-color:rgba(100,180,255,.3);color:#64b4ff">📥 Export CSV</button>
-  <button class="btn" onclick="resetChanges()" style="background:rgba(255,100,100,.1);border-color:rgba(255,100,100,.3);color:#ff6464">🗑 Reset</button>
-</div>
-
 </body>
 </html>

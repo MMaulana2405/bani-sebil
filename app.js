@@ -2,8 +2,8 @@
 // CONFIG - GANTI DENGAN TOKEN ANDA
 var GITHUB_OWNER = 'MMaulana2405';
 var GITHUB_REPO  = 'bani-sebil';
-var _p1 = 'ghp_cuODWVMdksK3clC6wS';
-var _p2 = '6ICqAevZfJ761Uo9rS';
+var _p1 = 'BAGIAN_PERTAMA_TOKEN';
+var _p2 = 'BAGIAN_KEDUA_TOKEN';
 var GITHUB_TOKEN = _p1 + _p2;
 
 // PASSWORD
