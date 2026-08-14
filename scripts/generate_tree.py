@@ -1,83 +1,103 @@
 #!/usr/bin/env python3
 """
-Script untuk generate tree.js dari data silsilah.
-Dijalankan otomatis oleh GitHub Actions setiap ada perubahan data.
+Script untuk generate tree.js dari data silsilah + approved submissions.
+Dijalankan otomatis oleh GitHub Actions.
 """
 
-import json
-import os
-import sys
+import json, os, sys
 
 def load_json(path, default):
     if os.path.exists(path):
         with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            try:
+                return json.load(f)
+            except:
+                return default
     return default
 
-def save_js(tree_data, output_path='tree.js'):
+def save_tree_js(tree_data, output_path='tree.js'):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write('const TREE=')
         json.dump(tree_data, f, ensure_ascii=False, separators=(',', ':'))
         f.write(';')
-    print(f"✅ tree.js berhasil digenerate ({os.path.getsize(output_path):,} bytes)")
+    print(f"tree.js saved ({os.path.getsize(output_path):,} bytes)")
 
-def apply_approved_submissions(tree_data, approved):
-    """Terapkan semua submission yang sudah diapprove ke tree data."""
-    
-    # Build flat index
-    node_map = {}
-    def index_nodes(node):
-        node_map[node['id']] = node
-        for c in node.get('c', []):
-            index_nodes(c)
-    
+def find_node_by_name(name, node, results=None):
+    if results is None:
+        results = []
+    if node.get('n', '').lower() == name.lower():
+        results.append(node)
+    for c in node.get('c', []):
+        find_node_by_name(name, c, results)
+    return results
+
+def find_in_tree(name, tree_data):
+    results = []
     for anc in tree_data.get('ancestors', []):
-        index_nodes(anc)
-    index_nodes(tree_data['sebil'])
+        find_node_by_name(name, anc, results)
+    find_node_by_name(name, tree_data['sebil'], results)
+    return results
+
+def get_max_id(node, current_max=0):
+    current_max = max(current_max, node.get('id', 0))
+    for c in node.get('c', []):
+        current_max = get_max_id(c, current_max)
+    return current_max
+
+def main():
+    print("Starting generate_tree.py...")
     
-    # Find node by name
-    def find_by_name(name, node=None, results=None):
-        if results is None:
-            results = []
-        if node is None:
-            for anc in tree_data.get('ancestors', []):
-                find_by_name(name, anc, results)
-            find_by_name(name, tree_data['sebil'], results)
-            return results
-        if node.get('n', '').lower() == name.lower():
-            results.append(node)
-        for c in node.get('c', []):
-            find_by_name(name, c, results)
-        return results
+    # Load current tree.js
+    if not os.path.exists('tree.js'):
+        print("ERROR: tree.js not found!")
+        sys.exit(1)
     
-    # Get next ID
-    all_ids = list(node_map.keys())
-    next_id = max(all_ids) + 1 if all_ids else 10000
+    with open('tree.js', 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Extract JSON from "const TREE=...;"
+    json_str = content[len('const TREE='):-1]
+    tree_data = json.loads(json_str)
+    print(f"tree.js loaded successfully")
+    
+    # Load approved submissions
+    approved = load_json('data/approved.json', [])
+    print(f"Found {len(approved)} approved submissions")
+    
+    if not approved:
+        print("No approved submissions to process. Done.")
+        return
+    
+    # Get max ID for new nodes
+    max_id = get_max_id(tree_data['sebil'])
+    for anc in tree_data.get('ancestors', []):
+        max_id = max(max_id, get_max_id(anc))
     
     applied = 0
-    skipped = 0
+    skipped = []
     
     for sub in approved:
         tipe = sub.get('tipe', '')
         nama = sub.get('nama', '').strip()
         
         if not nama:
-            skipped += 1
             continue
         
         if tipe == 'TAMBAH_ANAK':
-            # Cari orang tua
             nama_ortu = sub.get('namaOrangTua', '').split(' + ')[0].strip()
-            parents = find_by_name(nama_ortu)
-            if not parents:
-                print(f"⚠️  Orang tua '{nama_ortu}' tidak ditemukan untuk '{nama}'")
-                skipped += 1
+            if not nama_ortu:
+                skipped.append(f"{nama}: no parent name")
                 continue
-            parent = parents[0]
             
-            # Buat node baru
+            parents = find_in_tree(nama_ortu, tree_data)
+            if not parents:
+                skipped.append(f"{nama}: parent '{nama_ortu}' not found")
+                continue
+            
+            parent = parents[0]
+            max_id += 1
             new_node = {
-                'id': next_id,
+                'id': max_id,
                 'n': nama,
                 's': sub.get('pasangan') or None,
                 'g': parent.get('g', 5) + 1,
@@ -86,18 +106,20 @@ def apply_approved_submissions(tree_data, approved):
                 'c': []
             }
             parent.setdefault('c', []).append(new_node)
-            node_map[next_id] = new_node
-            next_id += 1
             applied += 1
-            print(f"✅ Ditambahkan: {nama} (anak dari {nama_ortu})")
+            print(f"Added: {nama} (child of {nama_ortu})")
         
         elif tipe == 'UPDATE':
             nama_asli = sub.get('namaAsli', '').strip()
-            nodes = find_by_name(nama_asli)
-            if not nodes:
-                print(f"⚠️  Node '{nama_asli}' tidak ditemukan untuk update")
-                skipped += 1
+            if not nama_asli:
+                skipped.append(f"UPDATE: no original name")
                 continue
+            
+            nodes = find_in_tree(nama_asli, tree_data)
+            if not nodes:
+                skipped.append(f"UPDATE: '{nama_asli}' not found")
+                continue
+            
             node = nodes[0]
             node['n'] = nama
             if sub.get('pasangan'):
@@ -105,76 +127,23 @@ def apply_approved_submissions(tree_data, approved):
             if sub.get('catatan'):
                 node['note'] = sub['catatan']
             applied += 1
-            print(f"✅ Diupdate: {nama_asli} → {nama}")
+            print(f"Updated: {nama_asli} -> {nama}")
+    
+    print(f"\nResult: {applied} applied, {len(skipped)} skipped")
+    if skipped:
+        for s in skipped:
+            print(f"  Skipped: {s}")
+    
+    if applied > 0:
+        # Save new tree.js
+        save_tree_js(tree_data)
         
-        elif tipe == 'HAPUS':
-            nama_hapus = sub.get('namaAsli', nama).strip()
-            nodes = find_by_name(nama_hapus)
-            if not nodes:
-                print(f"⚠️  Node '{nama_hapus}' tidak ditemukan untuk dihapus")
-                skipped += 1
-                continue
-            node = nodes[0]
-            # Remove from parent
-            def remove_from_parent(target_id, parent_node):
-                if 'c' in parent_node:
-                    parent_node['c'] = [c for c in parent_node['c'] if c['id'] != target_id]
-                    for c in parent_node['c']:
-                        remove_from_parent(target_id, c)
-            for anc in tree_data.get('ancestors', []):
-                remove_from_parent(node['id'], anc)
-            remove_from_parent(node['id'], tree_data['sebil'])
-            applied += 1
-            print(f"✅ Dihapus: {nama_hapus}")
-    
-    print(f"\n📊 Hasil: {applied} diterapkan, {skipped} dilewati")
-    return tree_data
-
-def main():
-    print("🌳 Memulai generate tree.js...")
-    
-    # Load base tree data (dari tree.js yang ada)
-    # Kita baca tree.js dan extract JSON-nya
-    if not os.path.exists('tree.js'):
-        print("❌ tree.js tidak ditemukan!")
-        sys.exit(1)
-    
-    with open('tree.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    # Extract JSON dari "const TREE=...;"
-    json_str = content[len('const TREE='):-1]
-    tree_data = json.loads(json_str)
-    print(f"✅ tree.js dimuat ({len(json_str):,} chars)")
-    
-    # Load approved submissions
-    approved = load_json('data/approved.json', [])
-    print(f"📋 Ditemukan {len(approved)} submission yang diapprove")
-    
-    if approved:
-        tree_data = apply_approved_submissions(tree_data, approved)
-        
-        # Clear approved after applying (move to archive)
-        archive = load_json('data/archive.json', [])
-        archive.extend(approved)
-        os.makedirs('data', exist_ok=True)
-        with open('data/archive.json', 'w', encoding='utf-8') as f:
-            json.dump(archive, f, ensure_ascii=False, indent=2)
+        # Clear approved.json after processing
         with open('data/approved.json', 'w', encoding='utf-8') as f:
             json.dump([], f)
-        print(f"📦 {len(approved)} submission diarsipkan")
+        print("approved.json cleared")
     
-    # Count nodes
-    def count_nodes(node):
-        return 1 + sum(count_nodes(c) for c in node.get('c', []))
-    
-    total = sum(count_nodes(a) for a in tree_data.get('ancestors', []))
-    total += count_nodes(tree_data['sebil'])
-    print(f"👥 Total anggota: {total:,}")
-    
-    # Save tree.js
-    save_js(tree_data)
-    print("🎉 Selesai!")
+    print("Done!")
 
 if __name__ == '__main__':
     main()
