@@ -1,0 +1,40 @@
+name: Update Silsilah Otomatis
+
+on:
+  # Jalan otomatis setiap ada push ke submissions.json
+  push:
+    paths:
+      - 'data/submissions.json'
+      - 'data/approved.json'
+  
+  # Bisa dijalankan manual dari GitHub
+  workflow_dispatch:
+
+jobs:
+  generate-tree:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install requests
+      
+      - name: Generate tree.js dari approved data
+        run: python scripts/generate_tree.py
+      
+      - name: Commit dan push tree.js baru
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions Bot"
+          git add tree.js
+          git diff --staged --quiet || git commit -m "🌳 Auto-update silsilah [$(date '+%Y-%m-%d %H:%M')]"
+          git push
