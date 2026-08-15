@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';   // Ganti dengan cloud name Anda
+var CLOUDINARY_CLOUD  = 'nawa3l3k';   // Ganti dengan cloud name Anda
 var CLOUDINARY_PRESET = 'bani-sebil-foto';   // Upload preset (unsigned)
 
 // ── PASSWORD ──────────────────────────────────────────────
