@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -576,11 +576,12 @@ document.getElementById('adminModal').addEventListener('click',function(e){if(e.
 // ── INIT ──────────────────────────────────────────────────
 // Load data dari Supabase via API (bukan dari tree.js)
 function initApp(treeData){
+  // Set global TREE so all existing code works (layoutTree, render, buildSidebar, etc)
+  window.TREE = treeData;
+  window.TREE_WIVES = treeData.wives || ['Ma Jangkung','Ma Hideung','Ma Aeni'];
   // Build index dari data API
   treeData.ancestors.forEach(function(a){buildIndex(a,null);});
   buildIndex(treeData.sebil,null);
-  // Store wives globally
-  window.TREE_WIVES = treeData.wives || ['Ma Jangkung','Ma Hideung','Ma Aeni'];
   // Collapse all by default
   allNodes.forEach(function(n){if((n.c||[]).length>0)collapsed.add(n.id);});
   treeData.ancestors.forEach(function(a){collapsed.delete(a.id);});
@@ -616,13 +617,8 @@ function loadTreeData(){
     .catch(function(e){
       if(loadingEl) loadingEl.style.display='none';
       console.error('loadTreeData error:', e);
-      // Fallback: coba load dari tree.js jika ada
-      if(typeof TREE !== 'undefined'){
-        console.log('Fallback ke tree.js lokal');
-        initApp(TREE);
-      } else {
-        document.getElementById('app').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px"><div style="font-size:40px">❌</div><div style="font-size:16px;font-weight:700;color:#dc2626">Gagal memuat data silsilah</div><div style="font-size:12px;color:#6b7280">'+e.message+'</div><button onclick="location.reload()" style="background:#1a7a3c;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px;font-weight:600">Coba Lagi</button></div>';
-      }
+      // Tampilkan error dengan tombol retry
+      document.getElementById('app').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:var(--bg)"><div style="font-size:40px">❌</div><div style="font-size:16px;font-weight:700;color:#dc2626">Gagal memuat data silsilah</div><div style="font-size:12px;color:#6b7280;text-align:center;max-width:300px">'+e.message+'</div><button onclick="location.reload()" style="background:#1a7a3c;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px;font-weight:600;margin-top:8px">🔄 Coba Lagi</button></div>';
     });
 }
 
