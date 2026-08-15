@@ -1,21 +1,5 @@
 [
   {
-    "tipe": "UPDATE",
-    "nama": "M. Maulana I",
-    "pasangan": "Hasri Imroatul Izza",
-    "jk": "L",
-    "tglLahir": "1999-05-24",
-    "tmptLahir": "Bekasi",
-    "hp": "08989210565",
-    "alamat": "Lippo",
-    "catatan": "test",
-    "namaOrangTua": "",
-    "namaAsli": "M. Maulana I",
-    "fotoUrl": null,
-    "timestamp": "2026-08-15T16:12:07.462Z",
-    "id": "sub_1786810327464"
-  },
-  {
     "tipe": "TAMBAH_ANAK",
     "nama": "test",
     "pasangan": null,
