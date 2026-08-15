@@ -92,22 +92,72 @@ function openAdminPanel(){
 }
 
 function renderAdminPanel(pending){
-  currentPendingList = pending.slice(); // save globally
-  var contentEl=document.getElementById('adminContent');if(!contentEl)return;
+  currentPendingList = pending.slice();
+  var contentEl=document.getElementById('adminContent');
+  if(!contentEl)return;
   if(!pending.length){
-    contentEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--txt2)"><div style="font-size:40px;margin-bottom:12px">OK</div><div style="font-weight:700">Tidak ada permintaan pending</div></div>';
+    contentEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--txt2)"><div style="font-size:40px;margin-bottom:12px">✅</div><div style="font-weight:700">Tidak ada permintaan pending</div><div style="font-size:12px;margin-top:6px">Semua permintaan sudah diproses</div></div>';
     return;
   }
   contentEl.innerHTML=pending.map(function(item,i){
-    return '<div style="background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:12px;padding:14px;margin-bottom:10px">'
-      +'<div style="font-size:14px;font-weight:800;color:var(--txt);margin-bottom:6px">'+(item.nama||'')+'</div>'
-      +(item.pasangan?'<div style="font-size:12px;color:var(--txt2);margin-bottom:2px">Pasangan: <b>'+item.pasangan+'</b></div>':'')
-      +(item.namaOrangTua?'<div style="font-size:12px;color:var(--txt2);margin-bottom:2px">Orang Tua: <b>'+item.namaOrangTua+'</b></div>':'')
-      +(item.tipe?'<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Tipe: '+item.tipe+'</div>':'')
-      +'<div style="display:flex;gap:8px">'
-      +'<button onclick="approveItem('+i+')" style="flex:1;background:var(--green);border:none;border-radius:8px;color:#fff;padding:8px;font-size:12px;font-weight:700;cursor:pointer">Setujui</button>'
-      +'<button onclick="rejectItem('+i+')" style="flex:1;background:#fff;border:1.5px solid #ef4444;border-radius:8px;color:#ef4444;padding:8px;font-size:12px;font-weight:700;cursor:pointer">Tolak</button>'
+    var tipeLabel='',tipeColor='',tipeIcon='';
+    if(item.tipe==='TAMBAH_ANAK'){tipeLabel='Tambah Anak Baru';tipeColor='#059669';tipeIcon='➕';}
+    else if(item.tipe==='UPDATE'){tipeLabel='Update Data';tipeColor='#2563eb';tipeIcon='✏️';}
+    else if(item.tipe==='HAPUS'){tipeLabel='Hapus Data';tipeColor='#dc2626';tipeIcon='🗑️';}
+    else{tipeLabel=item.tipe||'Lainnya';tipeColor='#7c3aed';tipeIcon='📝';}
+
+    var currentNode=null;
+    if(item.tipe==='UPDATE'&&item.namaAsli){currentNode=allNodes.find(function(n){return n.n===item.namaAsli;});}
+    var parentNode=null;
+    if(item.namaOrangTua){var pname=item.namaOrangTua.split(' + ')[0].trim();parentNode=allNodes.find(function(n){return n.n.toLowerCase()===pname.toLowerCase();});}
+
+    var html='<div style="background:#fff;border:1.5px solid var(--green-mid);border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(26,122,60,0.08)">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+    html+='<span style="background:'+tipeColor+'22;color:'+tipeColor+';border:1px solid '+tipeColor+'44;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700">'+tipeIcon+' '+tipeLabel+'</span>';
+    html+='<span style="font-size:10px;color:var(--txt3)">'+new Date(item.timestamp||Date.now()).toLocaleString('id-ID')+'</span>';
+    html+='</div>';
+
+    // BEFORE / AFTER
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+    html+='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px">';
+    html+='<div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">⬅ Sebelum</div>';
+    if(item.tipe==='TAMBAH_ANAK'){
+      html+='<div style="font-size:11px;color:#6b7280;font-style:italic">Belum ada</div>';
+      if(parentNode){html+='<div style="font-size:11px;color:#374151;margin-top:4px">Orang tua: <b>'+parentNode.n+'</b></div>';html+='<div style="font-size:10px;color:#6b7280">Saat ini punya '+parentNode.c.length+' anak</div>';}
+    } else if(item.tipe==='UPDATE'&&currentNode){
+      html+='<div style="font-size:13px;font-weight:700;color:#374151">'+currentNode.n+'</div>';
+      if(currentNode.s)html+='<div style="font-size:11px;color:#6b7280">♥ '+currentNode.s+'</div>';
+      if(currentNode.note)html+='<div style="font-size:10px;color:#6b7280;margin-top:2px">'+currentNode.note+'</div>';
+    } else if(item.tipe==='HAPUS'){
+      var delNode=allNodes.find(function(n){return n.n===item.namaAsli||n.n===item.nama;});
+      if(delNode){html+='<div style="font-size:13px;font-weight:700;color:#374151">'+delNode.n+'</div>';html+='<div style="font-size:10px;color:#6b7280">'+delNode.c.length+' keturunan akan ikut terhapus</div>';}
+      else{html+='<div style="font-size:11px;color:#6b7280">'+item.nama+'</div>';}
+    } else {
+      html+='<div style="font-size:11px;color:#6b7280;font-style:italic">Data tidak ditemukan</div>';
+    }
+    html+='</div>';
+
+    html+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px">';
+    html+='<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">➡ Sesudah</div>';
+    if(item.tipe==='HAPUS'){
+      html+='<div style="font-size:11px;color:#dc2626;font-weight:600">Data akan dihapus permanen</div>';
+    } else {
+      html+='<div style="font-size:13px;font-weight:700;color:#374151">'+(item.nama||'-')+'</div>';
+      if(item.pasangan)html+='<div style="font-size:11px;color:#6b7280">♥ '+item.pasangan+'</div>';
+      if(item.namaOrangTua)html+='<div style="font-size:11px;color:#374151;margin-top:4px">Orang tua: <b>'+item.namaOrangTua+'</b></div>';
+      if(item.jk)html+='<div style="font-size:10px;color:#6b7280">'+(item.jk==='L'?'Laki-laki':'Perempuan')+'</div>';
+      if(item.tglLahir)html+='<div style="font-size:10px;color:#6b7280">Lahir: '+item.tglLahir+(item.tmptLahir?' di '+item.tmptLahir:'')+'</div>';
+      if(item.hp)html+='<div style="font-size:10px;color:#6b7280">HP: '+item.hp+'</div>';
+      if(item.catatan)html+='<div style="font-size:10px;color:#6b7280;margin-top:2px">'+item.catatan+'</div>';
+            if(item.fotoUrl)html+='<div style="margin-top:6px"><img src="'+item.fotoUrl+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #1a7a3c"></div>';
+    }
+    html+='</div></div>';
+
+    html+='<div style="display:flex;gap:8px">'
+      +'<button onclick="approveItem('+i+')" style="flex:1;background:var(--green);border:none;border-radius:8px;color:#fff;padding:9px;font-size:12px;font-weight:700;cursor:pointer">✅ Setujui & Terapkan</button>'
+      +'<button onclick="rejectItem('+i+')" style="flex:1;background:#fff;border:1.5px solid #ef4444;border-radius:8px;color:#ef4444;padding:9px;font-size:12px;font-weight:700;cursor:pointer">❌ Tolak</button>'
       +'</div></div>';
+    return html;
   }).join('');
 }
 
@@ -369,7 +419,40 @@ function submitForm(){
 
 document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-function deleteNode(id){var node=nodeMap[id];if(!node)return;var kids=node.c||[];var msg='Hapus "'+node.n+'"?';if(kids.length>0)msg+=' Peringatan: '+kids.length+' anak juga akan terhapus!';if(!confirm(msg))return;if(node._parent)node._parent.c=node._parent.c.filter(function(c){return c.id!==id;});function removeAll(n){delete nodeMap[n.id];var idx2=allNodes.findIndex(function(x){return x.id===n.id;});if(idx2>-1)allNodes.splice(idx2,1);(n.c||[]).forEach(function(c){removeAll(c);});}removeAll(node);closeInfo();layoutTree();render();buildSidebar();buildListView();document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');showToast('"'+node.n+'" berhasil dihapus');}
+function deleteNode(id){
+  var node=nodeMap[id];if(!node)return;
+  var kids=node.c||[];
+  var msg='Hapus "'+node.n+'" dari pohon silsilah?';
+  if(kids.length>0)msg+='\n\nPeringatan: node ini memiliki '+kids.length+' anak. Semua keturunannya juga akan ikut terhapus!';
+  msg+='\n\nPerubahan ini akan PERMANEN setelah disetujui admin.';
+  if(!confirm(msg))return;
+
+  // Remove from browser tree
+  if(node._parent)node._parent.c=node._parent.c.filter(function(c){return c.id!==id;});
+  function removeAll(n){delete nodeMap[n.id];var idx2=allNodes.findIndex(function(x){return x.id===n.id;});if(idx2>-1)allNodes.splice(idx2,1);(n.c||[]).forEach(function(c){removeAll(c);});}
+  removeAll(node);
+  closeInfo();layoutTree();render();buildSidebar();buildListView();
+  document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');
+
+  // Submit delete request to server
+  fetch('/api/submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      tipe:'HAPUS',
+      nama:node.n,
+      namaAsli:node.n,
+      namaOrangTua:node._parent?node._parent.n:'',
+      catatan:'Hapus node dan '+kids.length+' keturunan'
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.success)showToast('"'+node.n+'" dihapus dari tampilan. Admin akan memverifikasi penghapusan permanen.');
+    else showToast('Dihapus dari tampilan. Gagal kirim ke server: '+(d.error||''));
+  })
+  .catch(function(){showToast('"'+node.n+'" dihapus dari tampilan.');});
+}
 function moveNode(id){var node=nodeMap[id];if(!node)return;var newParentName=prompt('Masukkan nama orang tua baru untuk "'+node.n+'":');if(!newParentName)return;var newParent=allNodes.find(function(n){return n.n.toLowerCase()===newParentName.trim().toLowerCase();});if(!newParent){alert('Nama "'+newParentName+'" tidak ditemukan.');return;}if(newParent.id===id){alert('Tidak bisa memindahkan ke diri sendiri!');return;}if(node._parent)node._parent.c=node._parent.c.filter(function(c){return c.id!==id;});newParent.c.push(node);node._parent=newParent;function updateGen(n,gen){n.g=gen;(n.c||[]).forEach(function(c){updateGen(c,gen+1);});}updateGen(node,newParent.g+1);layoutTree();render();buildSidebar();showInfo(id);showToast('"'+node.n+'" berhasil dipindahkan ke "'+newParent.n+'"');}
 
 function exportToCSV(){
@@ -419,8 +502,8 @@ svg.addEventListener('click',function(e){if(e.target===svg||e.target.tagName==='
 
 // ── CLOUDINARY CONFIG ─────────────────────────────────
 // Daftar gratis di cloudinary.com → dapat cloud_name dan upload_preset
-var CLOUDINARY_CLOUD = 'nawa3l3k';      // contoh: 'bani-sebil-ikbas'
-var CLOUDINARY_PRESET = 'bani-sebil-foto';  // contoh: 'ml_default'
+var CLOUDINARY_CLOUD = 'CLOUD_NAME_ANDA';      // contoh: 'bani-sebil-ikbas'
+var CLOUDINARY_PRESET = 'UPLOAD_PRESET_ANDA';  // contoh: 'ml_default'
 
 // ── PHOTO FUNCTIONS ───────────────────────────────────
 function handlePhotoSelect(input){
@@ -443,14 +526,14 @@ function uploadToCloudinary(file){
   document.getElementById('photoUploading').style.display='flex';
   document.getElementById('photoUploadArea').style.display='none';
 
-  if(CLOUDINARY_CLOUD==='CLOUD_NAME_ANDA'){
+  if(CLOUDINARY_CLOUD==='CLOUD_NAME_ANDA'||!CLOUDINARY_CLOUD){
     // Demo mode: use local preview only (no actual upload)
     var reader=new FileReader();
     reader.onload=function(e){
       showPhotoPreview(e.target.result);
-      document.getElementById('fFotoUrl').value=e.target.result;
+      document.getElementById('fFotoUrl').value='';  // Don't save base64 - too large
       document.getElementById('photoUploading').style.display='none';
-      showToast('Preview foto siap! (Setup Cloudinary untuk upload permanen)');
+      showToast('Preview foto tampil! Setup Cloudinary di app.js untuk upload permanen.');
     };
     reader.readAsDataURL(file);
     return;
