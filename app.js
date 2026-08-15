@@ -423,36 +423,39 @@ function deleteNode(id){
   var node=nodeMap[id];if(!node)return;
   var kids=node.c||[];
   var msg='Hapus "'+node.n+'" dari pohon silsilah?';
-  if(kids.length>0)msg+='\n\nPeringatan: node ini memiliki '+kids.length+' anak. Semua keturunannya juga akan ikut terhapus!';
-  msg+='\n\nPerubahan ini akan PERMANEN setelah disetujui admin.';
+  if(kids.length>0)msg+=' Peringatan: '+kids.length+' anak juga akan ikut terhapus!';
   if(!confirm(msg))return;
 
-  // Remove from browser tree
+  var nodeName=node.n;
+  var parentName=node._parent?node._parent.n:'';
+
+  // Remove from browser immediately
   if(node._parent)node._parent.c=node._parent.c.filter(function(c){return c.id!==id;});
-  function removeAll(n){delete nodeMap[n.id];var idx2=allNodes.findIndex(function(x){return x.id===n.id;});if(idx2>-1)allNodes.splice(idx2,1);(n.c||[]).forEach(function(c){removeAll(c);});}
+  function removeAll(n){delete nodeMap[n.id];var i2=allNodes.findIndex(function(x){return x.id===n.id;});if(i2>-1)allNodes.splice(i2,1);(n.c||[]).forEach(function(c){removeAll(c);});}
   removeAll(node);
   closeInfo();layoutTree();render();buildSidebar();buildListView();
   document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');
 
-  // Submit delete request to server
+  // Submit HAPUS request to server - goes through admin approval
   fetch('/api/submit',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       tipe:'HAPUS',
-      nama:node.n,
-      namaAsli:node.n,
-      namaOrangTua:node._parent?node._parent.n:'',
-      catatan:'Hapus node dan '+kids.length+' keturunan'
+      nama:nodeName,
+      namaAsli:nodeName,
+      namaOrangTua:parentName,
+      catatan:'Hapus node dan '+kids.length+' keturunan. ID: '+id
     })
   })
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.success)showToast('"'+node.n+'" dihapus dari tampilan. Admin akan memverifikasi penghapusan permanen.');
-    else showToast('Dihapus dari tampilan. Gagal kirim ke server: '+(d.error||''));
+    if(d.success)showToast('"'+nodeName+'" dihapus dari tampilan. Admin perlu approve agar permanen.');
+    else showToast('Dihapus dari tampilan. Gagal kirim ke server.');
   })
-  .catch(function(){showToast('"'+node.n+'" dihapus dari tampilan.');});
+  .catch(function(){showToast('"'+nodeName+'" dihapus dari tampilan saja.');});
 }
+
 function moveNode(id){var node=nodeMap[id];if(!node)return;var newParentName=prompt('Masukkan nama orang tua baru untuk "'+node.n+'":');if(!newParentName)return;var newParent=allNodes.find(function(n){return n.n.toLowerCase()===newParentName.trim().toLowerCase();});if(!newParent){alert('Nama "'+newParentName+'" tidak ditemukan.');return;}if(newParent.id===id){alert('Tidak bisa memindahkan ke diri sendiri!');return;}if(node._parent)node._parent.c=node._parent.c.filter(function(c){return c.id!==id;});newParent.c.push(node);node._parent=newParent;function updateGen(n,gen){n.g=gen;(n.c||[]).forEach(function(c){updateGen(c,gen+1);});}updateGen(node,newParent.g+1);layoutTree();render();buildSidebar();showInfo(id);showToast('"'+node.n+'" berhasil dipindahkan ke "'+newParent.n+'"');}
 
 function exportToCSV(){
@@ -502,8 +505,8 @@ svg.addEventListener('click',function(e){if(e.target===svg||e.target.tagName==='
 
 // ── CLOUDINARY CONFIG ─────────────────────────────────
 // Daftar gratis di cloudinary.com → dapat cloud_name dan upload_preset
-var CLOUDINARY_CLOUD = 'nawa3l3k';      // contoh: 'bani-sebil-ikbas'
-var CLOUDINARY_PRESET = 'bani-sebil-foto';  // contoh: 'ml_default'
+var CLOUDINARY_CLOUD = 'CLOUD_NAME_ANDA';      // contoh: 'bani-sebil-ikbas'
+var CLOUDINARY_PRESET = 'UPLOAD_PRESET_ANDA';  // contoh: 'ml_default'
 
 // ── PHOTO FUNCTIONS ───────────────────────────────────
 function handlePhotoSelect(input){
@@ -571,18 +574,25 @@ function uploadToCloudinary(file){
 }
 
 function showPhotoPreview(url){
-  // Show preview card
-  document.getElementById('photoPreviewImg').src=url;
-  document.getElementById('photoPreviewWrap').style.display='block';
-
-  // Update preview with current form values
+  var img=document.getElementById('photoPreviewImg');
+  var wrap=document.getElementById('photoPreviewWrap');
+  if(!img||!wrap)return;
+  img.src=url;
+  img.style.display='block';
+  wrap.style.display='block';
   updatePhotoPreview();
+  showToast('Foto berhasil dipilih! Lihat preview di bawah.');
 }
 
 function updatePhotoPreview(){
   var nama=document.getElementById('fNama').value||'Nama Lengkap';
   var pasangan=document.getElementById('fPasangan').value;
-  var parentName=document.getElementById('fParentName').textContent;
+  // Get parent info from fParentInfo div (only shown when adding child)
+  var parentInfoEl=document.getElementById('fParentInfo');
+  var parentName='';
+  if(parentInfoEl&&parentInfoEl.style.display!=='none'){
+    parentName=document.getElementById('fParentName').textContent;
+  }
 
   document.getElementById('previewName').textContent=nama;
   document.getElementById('previewSpouse').textContent=pasangan?'♥ '+pasangan:'';
