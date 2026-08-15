@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -41,7 +41,13 @@ function togglePw(){
 function enterApp(){
   var landing=document.getElementById('landing'), app=document.getElementById('app');
   landing.style.opacity='0'; landing.style.transition='opacity .4s';
-  setTimeout(function(){ landing.style.display='none'; app.classList.add('visible'); if(isAdmin) initAdminMode(); }, 400);
+  setTimeout(function(){
+    landing.style.display='none';
+    app.classList.add('visible');
+    if(isAdmin) initAdminMode();
+    // Load tree data setelah app visible
+    loadTreeData();
+  }, 400);
 }
 function logout(){
   if(!confirm('Keluar dari Silsilah IKBAS?')) return;
@@ -604,14 +610,13 @@ var CACHE_TTL = 30 * 60 * 1000; // 30 menit
 function loadTreeData(){
   var loadingEl = document.getElementById('app-loading');
 
-  // Cek prefetched data dulu (paling cepat!)
+  // Cek prefetched data dulu (paling cepat — sudah di-fetch saat landing page)
   if(window._prefetchedTree){
     if(loadingEl) loadingEl.style.display='none';
     window.TREE = window._prefetchedTree;
     initApp(window._prefetchedTree);
     window._prefetchedTree = null;
-    // Update cache di background
-    fetchAndCacheTree(false);
+    fetchAndCacheTree(false); // update cache di background
     return;
   }
 
@@ -621,19 +626,18 @@ function loadTreeData(){
     if(cached){
       var parsed = JSON.parse(cached);
       var age = Date.now() - (parsed.ts || 0);
-      if(age < CACHE_TTL && parsed.data){
-        // Pakai cache — loading instan!
+      if(age < CACHE_TTL && parsed.data && parsed.data.sebil){
+        // Cache valid — tampil instan, TIDAK perlu loading
         if(loadingEl) loadingEl.style.display='none';
         window.TREE = parsed.data;
         initApp(parsed.data);
-        // Update cache di background tanpa blokir UI
-        fetchAndCacheTree(false);
+        fetchAndCacheTree(false); // update di background
         return;
       }
     }
   } catch(e){}
 
-  // Tidak ada cache — fetch dari server
+  // Tidak ada cache valid — fetch dari server (tampilkan loading)
   if(loadingEl) loadingEl.style.display='flex';
   fetchAndCacheTree(true);
 }
@@ -647,19 +651,19 @@ function fetchAndCacheTree(showLoading){
     })
     .then(function(d){
       if(loadingEl && showLoading) loadingEl.style.display='none';
-      if(d.success && d.data){
+      if(d.success && d.data && d.data.sebil){
         // Simpan ke cache
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data: d.data}));
         } catch(e){}
         if(showLoading){
+          if(loadingEl) loadingEl.style.display='none';
           window.TREE = d.data;
           initApp(d.data);
         } else {
-          // Background update — update TREE tapi tidak re-render kecuali ada perubahan
-          if(d.data.total !== allNodes.length){
+          // Background update — hanya re-render jika jumlah data berubah
+          if(d.data.total && d.data.total !== allNodes.length){
             window.TREE = d.data;
-            // Reset dan reload
             allNodes=[]; nodeMap={}; posMap={}; collapsed=new Set(); hlId=null; maxGen=0;
             initApp(d.data);
             showToast('Data diperbarui dari server');
@@ -707,8 +711,10 @@ function fetchAndCacheTree(showLoading){
   // Auto-login jika sudah pernah login
   var s = sessionStorage.getItem('ikbas_auth');
   if(s==='admin'||s==='user'){
+    isAdmin = (s==='admin');
     document.getElementById('landing').style.display='none';
     document.getElementById('app').classList.add('visible');
+    if(isAdmin) initAdminMode();
     loadTreeData();
   }
 })();
