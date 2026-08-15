@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -322,7 +322,9 @@ function submitForm(){
     alamat:document.getElementById('fAlamat').value.trim()||null,
     catatan:document.getElementById('fCatatan').value.trim()||null,
     namaOrangTua:parentNode?(parentNode.n+(parentNode.s?' + '+parentNode.s:'')):'',
+    parentNodeId:parentNode?parentNode.id:null,
     namaAsli:editNode?editNode.n:'',
+    nodeId:editNode?editNode.id:null,
     fotoUrl:document.getElementById('fFotoUrl').value||null
   };
   var btn=document.getElementById('btnSubmit');
