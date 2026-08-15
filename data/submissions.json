@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "tipe": "HAPUS",
+    "nama": "abc",
+    "namaAsli": "abc",
+    "namaOrangTua": "M. Maulana I",
+    "catatan": "Hapus node dan 0 keturunan. ID: 1786806495939",
+    "timestamp": "2026-08-15T15:10:44.705Z",
+    "id": "sub_1786806644707"
+  }
+]
