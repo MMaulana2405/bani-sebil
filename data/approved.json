@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "tipe": "UPDATE",
+    "nama": "hapus",
+    "pasangan": "def",
+    "jk": "",
+    "tglLahir": "",
+    "tmptLahir": "",
+    "hp": "",
+    "alamat": "",
+    "catatan": "",
+    "namaOrangTua": "",
+    "namaAsli": "abc",
+    "fotoUrl": null,
+    "timestamp": "2026-08-15T14:44:18.364Z",
+    "id": "sub_1786805058366"
+  }
+]
