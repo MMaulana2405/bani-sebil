@@ -14,5 +14,14 @@
     "fotoUrl": null,
     "timestamp": "2026-08-15T15:35:12.758Z",
     "id": "sub_1786808112758"
+  },
+  {
+    "tipe": "HAPUS",
+    "nama": "abc",
+    "namaAsli": "abc",
+    "namaOrangTua": "M. Maulana I",
+    "catatan": "Hapus node dan 0 keturunan. ID: 2135",
+    "timestamp": "2026-08-15T15:34:56.630Z",
+    "id": "sub_1786808096630"
   }
 ]
