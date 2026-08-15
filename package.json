@@ -1,0 +1,11 @@
+{
+  "name": "bani-sebil-silsilah",
+  "version": "1.0.0",
+  "description": "Silsilah Keluarga Besar Bani Sebil - IKBAS",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
