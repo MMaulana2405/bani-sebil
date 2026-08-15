@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -576,6 +576,181 @@ function refreshTree(){
   allNodes=[];nodeMap={};posMap={};collapsed=new Set();hlId=null;maxGen=0;
   showToast('Memuat ulang data dari server...');
   loadTreeData();
+}
+
+// ── REALTIME UPDATE ──────────────────────────────────────
+// Fungsi untuk reload tree tanpa reset collapsed state
+function reloadTreeSilent(){
+  fetch('/api/tree?t='+Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.success && d.data && d.data.sebil){
+        try{ localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d.data})); }catch(e){}
+        window.TREE = d.data;
+        var savedCollapsed = new Set(collapsed);
+        allNodes=[]; nodeMap={}; maxGen=0;
+        d.data.ancestors.forEach(function(a){buildIndex(a,null);});
+        buildIndex(d.data.sebil,null);
+        collapsed = savedCollapsed;
+        collapsed.forEach(function(id){ if(!nodeMap[id]) collapsed.delete(id); });
+        layoutTree(); render(); buildSidebar(); buildListView();
+        document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');
+        document.getElementById('sgen').textContent=maxGen+1;
+        showToast('🔄 Data silsilah diperbarui!');
+      }
+    })
+    .catch(function(){});
+}
+
+// Supabase Realtime subscription
+function startRealtimeSync(){
+  // Gunakan Supabase Realtime via API endpoint yang kita buat
+  // Fallback ke polling jika Realtime tidak tersedia
+  if(typeof EventSource !== 'undefined'){
+    // Server-Sent Events untuk realtime update
+    var es = new EventSource('/api/tree/realtime');
+    es.onmessage = function(e){
+      try{
+        var data = JSON.parse(e.data);
+        if(data.type === 'UPDATE'){
+          reloadTreeSilent();
+        }
+      } catch(ex){}
+    };
+    es.onerror = function(){
+      es.close();
+      // Fallback ke polling jika SSE gagal
+      startPolling();
+    };
+  } else {
+    startPolling();
+  }
+}
+
+// Supabase Realtime - update instan saat ada perubahan di database
+var realtimeChannel = null;
+
+function startRealtimeSync(){
+  // Load Supabase client dari CDN jika belum ada
+  if(typeof window.supabaseClient !== 'undefined'){
+    connectRealtime();
+    return;
+  }
+  var script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = function(){ connectRealtime(); };
+  script.onerror = function(){ startPolling(); }; // fallback
+  document.head.appendChild(script);
+}
+
+function connectRealtime(){
+  try{
+    // Get Supabase config dari API
+    fetch('/api/config')
+      .then(function(r){ return r.json(); })
+      .then(function(cfg){
+        if(!cfg.url || !cfg.key){ startPolling(); return; }
+        var client = window.supabase.createClient(cfg.url, cfg.key);
+        window.supabaseClient = client;
+        // Subscribe ke perubahan tabel nodes
+        realtimeChannel = client
+          .channel('nodes-changes')
+          .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'nodes' },
+            function(payload){
+              console.log('Realtime update:', payload.eventType);
+              reloadTreeSilent();
+            }
+          )
+          .subscribe(function(status){
+            if(status === 'SUBSCRIBED'){
+              console.log('✅ Supabase Realtime connected');
+            } else if(status === 'CHANNEL_ERROR'){
+              console.log('Realtime error, fallback to polling');
+              startPolling();
+            }
+          });
+      })
+      .catch(function(){ startPolling(); });
+  } catch(e){ startPolling(); }
+}
+
+// Polling fallback (setiap 2 menit)
+var pollInterval = null;
+function startPolling(){
+  if(pollInterval) clearInterval(pollInterval);
+  var lastTotal = allNodes.length;
+  pollInterval = setInterval(function(){
+    if(document.hidden) return;
+    fetch('/api/tree/count?t='+Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.success && d.total !== lastTotal){
+          lastTotal = d.total;
+          reloadTreeSilent();
+        }
+      })
+      .catch(function(){});
+  }, 2 * 60 * 1000);
+}
+
+function startAutoRefresh(){ startRealtimeSync(); }
+
+// ── PULL TO REFRESH (HP) ──────────────────────────────────
+var pullStartY = 0;
+var pullDistance = 0;
+var isPulling = false;
+var PULL_THRESHOLD = 80; // pixel untuk trigger refresh
+
+function initPullToRefresh(){
+  var cwrap = document.getElementById('cwrap');
+  if(!cwrap) return;
+
+  // Pull indicator element
+  var indicator = document.createElement('div');
+  indicator.id = 'pull-indicator';
+  indicator.style.cssText = 'position:absolute;top:-50px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;z-index:100;transition:top .2s;pointer-events:none;white-space:nowrap';
+  indicator.textContent = '↓ Tarik untuk refresh';
+  cwrap.appendChild(indicator);
+
+  cwrap.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1) return;
+    // Hanya aktifkan pull-to-refresh jika pohon di posisi paling atas
+    if(vy >= 0){
+      pullStartY = e.touches[0].clientY;
+      isPulling = true;
+    }
+  }, {passive:true});
+
+  cwrap.addEventListener('touchmove', function(e){
+    if(!isPulling || e.touches.length !== 1) return;
+    pullDistance = e.touches[0].clientY - pullStartY;
+    if(pullDistance > 0 && vy >= -10){
+      var progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+      indicator.style.top = (pullDistance * 0.4 - 50) + 'px';
+      if(pullDistance >= PULL_THRESHOLD){
+        indicator.textContent = '↑ Lepas untuk refresh';
+        indicator.style.background = '#059669';
+      } else {
+        indicator.textContent = '↓ Tarik untuk refresh (' + Math.round(progress*100) + '%)';
+        indicator.style.background = 'var(--green)';
+      }
+    }
+  }, {passive:true});
+
+  cwrap.addEventListener('touchend', function(){
+    if(!isPulling) return;
+    isPulling = false;
+    indicator.style.top = '-50px';
+    indicator.textContent = '↓ Tarik untuk refresh';
+    indicator.style.background = 'var(--green)';
+    if(pullDistance >= PULL_THRESHOLD){
+      showToast('Memuat ulang data...');
+      try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
+      reloadTreeSilent();
+    }
+    pullDistance = 0;
+  }, {passive:true});
 }
 
 var toastTimer;
