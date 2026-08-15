@@ -505,8 +505,8 @@ svg.addEventListener('click',function(e){if(e.target===svg||e.target.tagName==='
 
 // ── CLOUDINARY CONFIG ─────────────────────────────────
 // Daftar gratis di cloudinary.com → dapat cloud_name dan upload_preset
-var CLOUDINARY_CLOUD = 'CLOUD_NAME_ANDA';      // contoh: 'bani-sebil-ikbas'
-var CLOUDINARY_PRESET = 'UPLOAD_PRESET_ANDA';  // contoh: 'ml_default'
+var CLOUDINARY_CLOUD = 'nawa3l3k';      // contoh: 'bani-sebil-ikbas'
+var CLOUDINARY_PRESET = 'bani-sebil-foto';  // contoh: 'ml_default'
 
 // ── PHOTO FUNCTIONS ───────────────────────────────────
 function handlePhotoSelect(input){
