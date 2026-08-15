@@ -1,0 +1,12 @@
+{
+  "name": "bani-sebil-silsilah",
+  "version": "3.0.0",
+  "description": "Silsilah Keluarga Besar Bani Sebil - IKBAS (Supabase Edition)",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
