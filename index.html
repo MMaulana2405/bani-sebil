@@ -63,18 +63,20 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;ba
 @media(max-width:600px){.hst{display:none}.ht p{display:none}}
 
 /* TOOLBAR */
-.tb{background:var(--glass2);border-bottom:2px solid var(--green-mid);padding:6px 10px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;box-shadow:0 2px 8px rgba(26,122,60,0.06)}
+.tb{background:var(--glass2);border-bottom:2px solid var(--green-mid);padding:6px 10px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;box-shadow:0 2px 8px rgba(26,122,60,0.06);position:relative;z-index:100;}
 @media(max-width:600px){.tb{flex-wrap:nowrap;overflow-x:auto;padding:6px 8px;gap:4px;-webkit-overflow-scrolling:touch;}
 .tb::-webkit-scrollbar{display:none;}
 .btn{flex-shrink:0;padding:5px 9px;font-size:11px;}
 .vtog{flex-shrink:0;}}
 .sb{position:relative;flex:1;min-width:140px;max-width:280px}
+@media(max-width:600px){.sb{min-width:120px;max-width:none;flex:1;}}
 .sb input{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:9px;padding:6px 9px 6px 30px;color:var(--txt);font-size:12px;outline:none;transition:all .2s;font-family:'Inter',sans-serif}
 .sb input:focus{border-color:var(--green2);box-shadow:0 0 0 3px rgba(34,160,80,0.1)}
 .sb input::placeholder{color:var(--txt3)}
 .sb .si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--txt3);pointer-events:none;font-size:12px}
-.sr{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--glass2);border:1.5px solid var(--border2);border-radius:9px;max-height:200px;overflow-y:auto;z-index:999;display:none;box-shadow:var(--shadow2)}
+.sr{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--glass2);border:1.5px solid var(--border2);border-radius:9px;max-height:200px;overflow-y:auto;z-index:9990;display:none;box-shadow:var(--shadow2)}
 .sr.show{display:block}
+@media(max-width:600px){.sr{position:fixed;top:auto;left:8px;right:8px;max-height:50vh;z-index:9990;}}
 .sri{padding:7px 11px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);transition:background .15s;color:var(--txt)}
 .sri:hover{background:var(--green-light)}
 .sri .gb{font-size:10px;color:var(--txt3);background:var(--green-light);border-radius:4px;padding:1px 5px;margin-left:4px}
