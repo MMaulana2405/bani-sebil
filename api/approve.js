@@ -41,8 +41,12 @@ module.exports = async function handler(req, res) {
         const parent = parents[0];
 
         // Insert node baru
+        // Generate unique ID (timestamp-based to avoid collision)
+        const newId = Date.now() + Math.floor(Math.random() * 1000);
+
         const { data: newNode, error: insertErr } = await supabase
           .from('nodes').insert({
+            id: newId,
             parent_id: parent.id,
             nama: item.nama,
             pasangan: item.pasangan || null,
