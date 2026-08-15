@@ -1,21 +1,5 @@
 [
   {
-    "tipe": "TAMBAH_ANAK",
-    "nama": "abc",
-    "pasangan": "def",
-    "jk": "",
-    "tglLahir": "",
-    "tmptLahir": "",
-    "hp": "",
-    "alamat": "",
-    "catatan": "",
-    "namaOrangTua": "M. Maulana I + Hasri Imroatul Izza",
-    "namaAsli": "",
-    "fotoUrl": null,
-    "timestamp": "2026-08-15T14:38:21.935Z",
-    "id": "sub_1786804701937"
-  },
-  {
     "tipe": "UPDATE",
     "nama": "M. Maulana I",
     "pasangan": "Hasri Imroatul Izza",
