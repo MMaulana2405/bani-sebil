@@ -38,6 +38,13 @@ def find_in_tree(name, tree_data):
     find_node_by_name(name, tree_data['sebil'], results)
     return results
 
+def remove_node_by_name(name, node):
+    """Remove node with given name from children list recursively"""
+    if 'c' in node:
+        node['c'] = [c for c in node['c'] if c.get('n','').lower() != name.lower()]
+        for c in node['c']:
+            remove_node_by_name(name, c)
+
 def get_max_id(node, current_max=0):
     current_max = max(current_max, node.get('id', 0))
     for c in node.get('c', []):
@@ -47,7 +54,6 @@ def get_max_id(node, current_max=0):
 def main():
     print("Starting generate_tree.py...")
     
-    # Load current tree.js
     if not os.path.exists('tree.js'):
         print("ERROR: tree.js not found!")
         sys.exit(1)
@@ -55,12 +61,10 @@ def main():
     with open('tree.js', 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Extract JSON from "const TREE=...;"
     json_str = content[len('const TREE='):-1]
     tree_data = json.loads(json_str)
     print(f"tree.js loaded successfully")
     
-    # Load approved submissions
     approved = load_json('data/approved.json', [])
     print(f"Found {len(approved)} approved submissions")
     
@@ -68,7 +72,6 @@ def main():
         print("No approved submissions to process. Done.")
         return
     
-    # Get max ID for new nodes
     max_id = get_max_id(tree_data['sebil'])
     for anc in tree_data.get('ancestors', []):
         max_id = max(max_id, get_max_id(anc))
@@ -103,6 +106,7 @@ def main():
                 'g': parent.get('g', 5) + 1,
                 'w': parent.get('w'),
                 'note': sub.get('catatan') or None,
+                'foto': sub.get('fotoUrl') or None,
                 'c': []
             }
             parent.setdefault('c', []).append(new_node)
@@ -122,12 +126,32 @@ def main():
             
             node = nodes[0]
             node['n'] = nama
-            if sub.get('pasangan'):
-                node['s'] = sub['pasangan']
+            if sub.get('pasangan') is not None:
+                node['s'] = sub['pasangan'] or None
             if sub.get('catatan'):
                 node['note'] = sub['catatan']
+            if sub.get('fotoUrl'):
+                node['foto'] = sub['fotoUrl']
             applied += 1
             print(f"Updated: {nama_asli} -> {nama}")
+        
+        elif tipe == 'HAPUS':
+            # Remove node by name from entire tree
+            nama_hapus = sub.get('namaAsli', nama).strip()
+            nodes = find_in_tree(nama_hapus, tree_data)
+            if not nodes:
+                skipped.append(f"HAPUS: '{nama_hapus}' not found")
+                continue
+            
+            # Remove from all ancestors
+            for anc in tree_data.get('ancestors', []):
+                remove_node_by_name(nama_hapus, anc)
+            remove_node_by_name(nama_hapus, tree_data['sebil'])
+            applied += 1
+            print(f"Deleted: {nama_hapus}")
+        
+        else:
+            skipped.append(f"Unknown tipe: {tipe}")
     
     print(f"\nResult: {applied} applied, {len(skipped)} skipped")
     if skipped:
@@ -135,13 +159,19 @@ def main():
             print(f"  Skipped: {s}")
     
     if applied > 0:
-        # Save new tree.js
         save_tree_js(tree_data)
         
-        # Clear approved.json after processing
+        # Archive processed submissions
+        archive = load_json('data/archive.json', [])
+        archive.extend(approved)
+        os.makedirs('data', exist_ok=True)
+        with open('data/archive.json', 'w', encoding='utf-8') as f:
+            json.dump(archive, f, ensure_ascii=False, indent=2)
+        
+        # Clear approved.json
         with open('data/approved.json', 'w', encoding='utf-8') as f:
             json.dump([], f)
-        print("approved.json cleared")
+        print("approved.json cleared, archive updated")
     
     print("Done!")
 
