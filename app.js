@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
