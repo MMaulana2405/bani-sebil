@@ -34,16 +34,34 @@ module.exports = async function handler(req, res) {
       // ── TAMBAH ANAK ──────────────────────────────────────
       if (tipe === 'TAMBAH_ANAK' && item.namaOrangTua) {
         const parentName = item.namaOrangTua.split(' + ')[0].trim();
-        const { data: parents, error: parentErr } = await supabase
-          .from('nodes')
-          .select('id, generasi, wife_group')
-          .ilike('nama', parentName)
-          .limit(1);
+        console.log('Looking for parent:', parentName);
+
+        // Try exact match first, then case-insensitive
+        let parents = null;
+        let parentErr = null;
+
+        // Try 1: exact match
+        const res1 = await supabase.from('nodes').select('id, generasi, wife_group').eq('nama', parentName).limit(1);
+        if (res1.data && res1.data.length > 0) {
+          parents = res1.data;
+        } else {
+          // Try 2: case-insensitive
+          const res2 = await supabase.from('nodes').select('id, generasi, wife_group').ilike('nama', parentName).limit(1);
+          parents = res2.data;
+          parentErr = res2.error;
+        }
 
         if (parentErr) throw parentErr;
         if (!parents || parents.length === 0) {
-          return res.status(404).json({ error: 'Orang tua "' + parentName + '" tidak ditemukan di database' });
+          // Try 3: partial match (nama mengandung kata kunci)
+          const res3 = await supabase.from('nodes').select('id, generasi, wife_group, nama').ilike('nama', '%' + parentName + '%').limit(5);
+          console.log('Partial matches:', res3.data);
+          return res.status(404).json({
+            error: 'Orang tua "' + parentName + '" tidak ditemukan di database',
+            hint: res3.data ? 'Nama mirip: ' + res3.data.map(n => n.nama).join(', ') : 'Tidak ada nama mirip'
+          });
         }
+        console.log('Found parent:', parents[0]);
 
         const parent = parents[0];
         const newId = Date.now() + Math.floor(Math.random() * 1000);
