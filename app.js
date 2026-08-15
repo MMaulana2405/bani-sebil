@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -214,17 +214,36 @@ function approveItem(idx){
   }
   apiPost('/api/approve',{action:'approve',item:item},true)
     .then(function(d){
+      if(!d.success){ showToast('❌ Gagal: '+(d.error||'Unknown error')); return; }
       currentPendingList.splice(idx,1);
-      // Clear cache so next load gets fresh data from Supabase
+      // Clear ALL cache
       try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
       window._prefetchedTree = null;
-      showToast(d.message||'✅ Disetujui! Memuat ulang data...');
+      // Show clear success message
+      var successMsg = d.message || ('✅ ' + item.nama + ' berhasil ' + (item.tipe==='HAPUS'?'dihapus':'ditambahkan/diupdate') + '!');
+      showToast(successMsg);
       closeAdminPanel();
-      // Reload tree data immediately from Supabase
+      // Force reload from Supabase immediately
       setTimeout(function(){
         allNodes=[]; nodeMap={}; posMap={}; collapsed=new Set(); hlId=null; maxGen=0;
-        fetchAndCacheTree(true);
-      }, 500);
+        var loadingEl=document.getElementById('app-loading');
+        if(loadingEl) loadingEl.style.display='flex';
+        fetch('/api/tree?t='+Date.now()) // cache-bust
+          .then(function(r){return r.json();})
+          .then(function(d2){
+            if(loadingEl) loadingEl.style.display='none';
+            if(d2.success && d2.data && d2.data.sebil){
+              try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d2.data}));}catch(e){}
+              window.TREE=d2.data;
+              initApp(d2.data);
+              showToast('🌳 Pohon silsilah berhasil diperbarui!');
+            }
+          })
+          .catch(function(e){
+            if(loadingEl) loadingEl.style.display='none';
+            showToast('⚠️ Data tersimpan tapi gagal reload: '+e.message);
+          });
+      }, 800);
     })
     .catch(function(e){ showToast('❌ Gagal approve: '+e.message); });
 }
@@ -272,7 +291,8 @@ function uploadPhoto(file){
     .then(function(d){
       document.getElementById('photoUploading').style.display='none';
       if(d.secure_url){
-        var url=d.secure_url.replace('/upload/','/upload/w_300,h_300,c_fill,r_max,q_auto,f_auto/'); // removed g_face - causes corrupt on mobile
+        // Safe transformation - works on all devices without corruption
+        var url=d.secure_url.replace('/upload/','/upload/w_300,h_300,c_fill,q_auto,f_auto/');
         showPhotoPreview(url); document.getElementById('fFotoUrl').value=d.secure_url;
         showToast('✅ Foto berhasil diupload!');
       } else {
