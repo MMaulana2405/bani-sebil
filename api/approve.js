@@ -33,35 +33,50 @@ module.exports = async function handler(req, res) {
 
       // ── TAMBAH ANAK ──────────────────────────────────────
       if (tipe === 'TAMBAH_ANAK' && item.namaOrangTua) {
-        const parentName = item.namaOrangTua.split(' + ')[0].trim();
-        console.log('Looking for parent:', parentName);
+        const parentName = item.namaOrangTua ? item.namaOrangTua.split(' + ')[0].trim() : '';
+        console.log('Looking for parent - ID:', item.parentNodeId, 'Name:', parentName);
 
-        // Try exact match first, then case-insensitive
         let parents = null;
-        let parentErr = null;
 
-        // Try 1: exact match
-        const res1 = await supabase.from('nodes').select('id, generasi, wife_group').eq('nama', parentName).limit(1);
-        if (res1.data && res1.data.length > 0) {
-          parents = res1.data;
-        } else {
-          // Try 2: case-insensitive
-          const res2 = await supabase.from('nodes').select('id, generasi, wife_group').ilike('nama', parentName).limit(1);
-          parents = res2.data;
-          parentErr = res2.error;
+        // Prioritas 1: Cari by ID (paling akurat, tidak ada duplikat)
+        if (item.parentNodeId) {
+          const resId = await supabase.from('nodes')
+            .select('id, generasi, wife_group, nama')
+            .eq('id', item.parentNodeId)
+            .limit(1);
+          if (resId.data && resId.data.length > 0) {
+            parents = resId.data;
+            console.log('Found parent by ID:', parents[0].nama);
+          }
         }
 
-        if (parentErr) throw parentErr;
+        // Prioritas 2: Cari by nama jika ID tidak ada/tidak ketemu
         if (!parents || parents.length === 0) {
-          // Try 3: partial match (nama mengandung kata kunci)
-          const res3 = await supabase.from('nodes').select('id, generasi, wife_group, nama').ilike('nama', '%' + parentName + '%').limit(5);
-          console.log('Partial matches:', res3.data);
+          const resName = await supabase.from('nodes')
+            .select('id, generasi, wife_group, nama')
+            .eq('nama', parentName)
+            .limit(1);
+          if (resName.data && resName.data.length > 0) {
+            parents = resName.data;
+            console.log('Found parent by exact name:', parents[0].nama);
+          }
+        }
+
+        // Prioritas 3: Case-insensitive search
+        if (!parents || parents.length === 0) {
+          const resIlike = await supabase.from('nodes')
+            .select('id, generasi, wife_group, nama')
+            .ilike('nama', parentName)
+            .limit(1);
+          parents = resIlike.data;
+        }
+
+        if (!parents || parents.length === 0) {
           return res.status(404).json({
-            error: 'Orang tua "' + parentName + '" tidak ditemukan di database',
-            hint: res3.data ? 'Nama mirip: ' + res3.data.map(n => n.nama).join(', ') : 'Tidak ada nama mirip'
+            error: 'Orang tua "' + parentName + '" tidak ditemukan di database. Pastikan nama orang tua sudah benar.'
           });
         }
-        console.log('Found parent:', parents[0]);
+        console.log('Using parent:', parents[0]);
 
         const parent = parents[0];
         const newId = Date.now() + Math.floor(Math.random() * 1000);
@@ -98,13 +113,26 @@ module.exports = async function handler(req, res) {
 
       // ── UPDATE ────────────────────────────────────────────
       } else if (tipe === 'UPDATE' && item.namaAsli) {
-        const { data: existing, error: findErr } = await supabase
-          .from('nodes')
-          .select('id')
-          .ilike('nama', item.namaAsli)
-          .limit(1);
+        let existing = null;
 
-        if (findErr) throw findErr;
+        // Prioritas 1: Cari by ID (paling akurat)
+        if (item.nodeId) {
+          const resId = await supabase.from('nodes').select('id').eq('id', item.nodeId).limit(1);
+          if (resId.data && resId.data.length > 0) existing = resId.data;
+        }
+
+        // Prioritas 2: Cari by nama asli
+        if (!existing || existing.length === 0) {
+          const resName = await supabase.from('nodes').select('id').eq('nama', item.namaAsli).limit(1);
+          if (resName.data && resName.data.length > 0) existing = resName.data;
+        }
+
+        // Prioritas 3: Case-insensitive
+        if (!existing || existing.length === 0) {
+          const resIlike = await supabase.from('nodes').select('id').ilike('nama', item.namaAsli).limit(1);
+          existing = resIlike.data;
+        }
+
         if (!existing || existing.length === 0) {
           return res.status(404).json({ error: 'Node "' + item.namaAsli + '" tidak ditemukan' });
         }
@@ -138,13 +166,26 @@ module.exports = async function handler(req, res) {
       // ── HAPUS ─────────────────────────────────────────────
       } else if (tipe === 'HAPUS') {
         const namaHapus = item.namaAsli || item.nama;
-        const { data: existing, error: findErr } = await supabase
-          .from('nodes')
-          .select('id, nama')
-          .ilike('nama', namaHapus)
-          .limit(1);
+        let existing = null;
 
-        if (findErr) throw findErr;
+        // Prioritas 1: Cari by ID
+        if (item.nodeId) {
+          const resId = await supabase.from('nodes').select('id, nama').eq('id', item.nodeId).limit(1);
+          if (resId.data && resId.data.length > 0) existing = resId.data;
+        }
+
+        // Prioritas 2: Cari by nama
+        if (!existing || existing.length === 0) {
+          const resName = await supabase.from('nodes').select('id, nama').eq('nama', namaHapus).limit(1);
+          if (resName.data && resName.data.length > 0) existing = resName.data;
+        }
+
+        // Prioritas 3: Case-insensitive
+        if (!existing || existing.length === 0) {
+          const resIlike = await supabase.from('nodes').select('id, nama').ilike('nama', namaHapus).limit(1);
+          existing = resIlike.data;
+        }
+
         if (!existing || existing.length === 0) {
           return res.status(404).json({ error: 'Node "' + namaHapus + '" tidak ditemukan' });
         }
