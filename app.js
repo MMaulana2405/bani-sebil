@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -213,7 +213,19 @@ function approveItem(idx){
     }
   }
   apiPost('/api/approve',{action:'approve',item:item},true)
-    .then(function(d){ currentPendingList.splice(idx,1); showToast(d.message||'✅ Disetujui! Pohon akan update dalam ~2 menit.'); closeAdminPanel(); setTimeout(openAdminPanel,500); })
+    .then(function(d){
+      currentPendingList.splice(idx,1);
+      // Clear cache so next load gets fresh data from Supabase
+      try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
+      window._prefetchedTree = null;
+      showToast(d.message||'✅ Disetujui! Memuat ulang data...');
+      closeAdminPanel();
+      // Reload tree data immediately from Supabase
+      setTimeout(function(){
+        allNodes=[]; nodeMap={}; posMap={}; collapsed=new Set(); hlId=null; maxGen=0;
+        fetchAndCacheTree(true);
+      }, 500);
+    })
     .catch(function(e){ showToast('❌ Gagal approve: '+e.message); });
 }
 
@@ -221,7 +233,13 @@ function rejectItem(idx){
   if(!confirm('Tolak permintaan ini?')) return;
   var item=currentPendingList[idx]; if(!item) return;
   apiPost('/api/approve',{action:'reject',item:item},true)
-    .then(function(d){ currentPendingList.splice(idx,1); showToast(d.message||'Permintaan ditolak'); closeAdminPanel(); setTimeout(openAdminPanel,500); })
+    .then(function(d){
+      currentPendingList.splice(idx,1);
+      try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
+      showToast(d.message||'Permintaan ditolak');
+      closeAdminPanel();
+      setTimeout(openAdminPanel,500);
+    })
     .catch(function(e){ showToast('❌ Gagal tolak: '+e.message); });
 }
 
@@ -254,7 +272,7 @@ function uploadPhoto(file){
     .then(function(d){
       document.getElementById('photoUploading').style.display='none';
       if(d.secure_url){
-        var url=d.secure_url.replace('/upload/','/upload/w_300,h_300,c_fill,g_face,r_max,q_auto,f_auto/');
+        var url=d.secure_url.replace('/upload/','/upload/w_300,h_300,c_fill,r_max,q_auto,f_auto/'); // removed g_face - causes corrupt on mobile
         showPhotoPreview(url); document.getElementById('fFotoUrl').value=d.secure_url;
         showToast('✅ Foto berhasil diupload!');
       } else {
