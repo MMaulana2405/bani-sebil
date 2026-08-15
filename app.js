@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -557,8 +557,10 @@ function showResult(main,sen,desc,path){document.getElementById('rel-main').text
 
 // Refresh tree data from Supabase
 function refreshTree(){
+  // Clear cache dan reload dari server
+  try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
   allNodes=[];nodeMap={};posMap={};collapsed=new Set();hlId=null;maxGen=0;
-  showToast('Memuat ulang data...');
+  showToast('Memuat ulang data dari server...');
   loadTreeData();
 }
 
@@ -595,36 +597,115 @@ function initApp(treeData){
   showToast('Selamat datang di Silsilah IKBAS!');
 }
 
-// Load tree data dari Supabase API
+// Load tree data — dengan localStorage cache untuk loading instan
+var CACHE_KEY = 'ikbas_tree_cache';
+var CACHE_TTL = 30 * 60 * 1000; // 30 menit
+
 function loadTreeData(){
-  var loadingEl=document.getElementById('app-loading');
+  var loadingEl = document.getElementById('app-loading');
+
+  // Cek prefetched data dulu (paling cepat!)
+  if(window._prefetchedTree){
+    if(loadingEl) loadingEl.style.display='none';
+    window.TREE = window._prefetchedTree;
+    initApp(window._prefetchedTree);
+    window._prefetchedTree = null;
+    // Update cache di background
+    fetchAndCacheTree(false);
+    return;
+  }
+
+  // Cek cache di localStorage
+  try {
+    var cached = localStorage.getItem(CACHE_KEY);
+    if(cached){
+      var parsed = JSON.parse(cached);
+      var age = Date.now() - (parsed.ts || 0);
+      if(age < CACHE_TTL && parsed.data){
+        // Pakai cache — loading instan!
+        if(loadingEl) loadingEl.style.display='none';
+        window.TREE = parsed.data;
+        initApp(parsed.data);
+        // Update cache di background tanpa blokir UI
+        fetchAndCacheTree(false);
+        return;
+      }
+    }
+  } catch(e){}
+
+  // Tidak ada cache — fetch dari server
   if(loadingEl) loadingEl.style.display='flex';
+  fetchAndCacheTree(true);
+}
+
+function fetchAndCacheTree(showLoading){
+  var loadingEl = document.getElementById('app-loading');
   fetch('/api/tree')
     .then(function(r){
       if(!r.ok) throw new Error('HTTP '+r.status);
       return r.json();
     })
     .then(function(d){
-      if(loadingEl) loadingEl.style.display='none';
+      if(loadingEl && showLoading) loadingEl.style.display='none';
       if(d.success && d.data){
-        // Store globally for compatibility
-        window.TREE = d.data;
-        initApp(d.data);
+        // Simpan ke cache
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data: d.data}));
+        } catch(e){}
+        if(showLoading){
+          window.TREE = d.data;
+          initApp(d.data);
+        } else {
+          // Background update — update TREE tapi tidak re-render kecuali ada perubahan
+          if(d.data.total !== allNodes.length){
+            window.TREE = d.data;
+            // Reset dan reload
+            allNodes=[]; nodeMap={}; posMap={}; collapsed=new Set(); hlId=null; maxGen=0;
+            initApp(d.data);
+            showToast('Data diperbarui dari server');
+          }
+        }
       } else {
         throw new Error(d.error||'Gagal load data');
       }
     })
     .catch(function(e){
-      if(loadingEl) loadingEl.style.display='none';
-      console.error('loadTreeData error:', e);
-      // Tampilkan error dengan tombol retry
-      document.getElementById('app').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:var(--bg)"><div style="font-size:40px">❌</div><div style="font-size:16px;font-weight:700;color:#dc2626">Gagal memuat data silsilah</div><div style="font-size:12px;color:#6b7280;text-align:center;max-width:300px">'+e.message+'</div><button onclick="location.reload()" style="background:#1a7a3c;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px;font-weight:600;margin-top:8px">🔄 Coba Lagi</button></div>';
+      if(loadingEl && showLoading){
+        loadingEl.style.display='none';
+        document.getElementById('app').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:var(--bg)"><div style="font-size:40px">❌</div><div style="font-size:16px;font-weight:700;color:#dc2626">Gagal memuat data silsilah</div><div style="font-size:12px;color:#6b7280;text-align:center;max-width:300px">'+e.message+'</div><button onclick="location.reload()" style="background:#1a7a3c;color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px;font-weight:600;margin-top:8px">🔄 Coba Lagi</button></div>';
+      }
+      console.error('fetchAndCacheTree error:', e);
     });
 }
 
-// Auto-start setelah auth check
+// Pre-fetch tree data di background saat halaman dibuka
+// Sehingga saat user login, data sudah siap
 (function(){
-  var s=sessionStorage.getItem('ikbas_auth');
+  // Mulai fetch di background segera (sebelum login)
+  var cached = null;
+  try {
+    var c = localStorage.getItem(CACHE_KEY);
+    if(c){ var p = JSON.parse(c); if(Date.now() - (p.ts||0) < CACHE_TTL) cached = p.data; }
+  } catch(e){}
+
+  if(!cached){
+    // Tidak ada cache — pre-fetch di background
+    fetch('/api/tree')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.success && d.data){
+          try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data:d.data})); }catch(e){}
+          window._prefetchedTree = d.data;
+        }
+      })
+      .catch(function(){});
+  } else {
+    // Ada cache — simpan untuk dipakai langsung
+    window._prefetchedTree = cached;
+  }
+
+  // Auto-login jika sudah pernah login
+  var s = sessionStorage.getItem('ikbas_auth');
   if(s==='admin'||s==='user'){
     document.getElementById('landing').style.display='none';
     document.getElementById('app').classList.add('visible');
