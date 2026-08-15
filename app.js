@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── CONFIG ────────────────────────────────────────────────
-var CLOUDINARY_CLOUD  = 'nawa3l3k';
+var CLOUDINARY_CLOUD  = 'CLOUD_NAME_ANDA';
 var CLOUDINARY_PRESET = 'bani-sebil-foto';
 
 // ── PASSWORD ──────────────────────────────────────────────
@@ -178,40 +178,9 @@ function renderAdminPanel(pending){
 function approveItem(idx){
   var item=currentPendingList[idx];
   if(!item){ showToast('Item tidak ditemukan, refresh panel admin'); return; }
-  // Apply to browser tree immediately
-  if(item.tipe==='TAMBAH_ANAK'&&item.namaOrangTua){
-    var pname=item.namaOrangTua.split(' + ')[0].trim();
-    var pnode=allNodes.find(function(n){return n.n.toLowerCase()===pname.toLowerCase();});
-    if(pnode){
-      var nid=Date.now();
-      var nn={id:nid,n:item.nama,s:item.pasangan||null,g:pnode.g+1,w:pnode.w,note:item.catatan||null,foto:item.fotoUrl||null,jk:item.jk||null,tglLahir:item.tglLahir||null,tmptLahir:item.tmptLahir||null,hp:item.hp||null,alamat:item.alamat||null,c:[],_parent:pnode};
-      pnode.c.push(nn); allNodes.push(nn); nodeMap[nid]=nn;
-      layoutTree(); render(); buildSidebar(); buildListView();
-      document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');
-    }
-  } else if(item.tipe==='UPDATE'&&item.namaAsli){
-    var node=allNodes.find(function(n){return n.n===item.namaAsli;});
-    if(node){
-      node.n=item.nama;
-      if(item.pasangan!==undefined) node.s=item.pasangan||null;
-      if(item.catatan) node.note=item.catatan;
-      if(item.fotoUrl) node.foto=item.fotoUrl;
-      if(item.jk) node.jk=item.jk;
-      if(item.tglLahir) node.tglLahir=item.tglLahir;
-      if(item.tmptLahir) node.tmptLahir=item.tmptLahir;
-      if(item.hp) node.hp=item.hp;
-      if(item.alamat) node.alamat=item.alamat;
-      layoutTree(); render();
-    }
-  } else if(item.tipe==='HAPUS'){
-    var delNode=allNodes.find(function(n){return n.n===(item.namaAsli||item.nama);});
-    if(delNode){
-      if(delNode._parent) delNode._parent.c=delNode._parent.c.filter(function(c){return c.id!==delNode.id;});
-      function removeAll(n){delete nodeMap[n.id];var i2=allNodes.findIndex(function(x){return x.id===n.id;});if(i2>-1)allNodes.splice(i2,1);(n.c||[]).forEach(function(c){removeAll(c);});}
-      removeAll(delNode); layoutTree(); render(); buildSidebar(); buildListView();
-      document.getElementById('stot').textContent=allNodes.length.toLocaleString('id');
-    }
-  }
+
+  showToast('Memproses...');
+
   apiPost('/api/approve',{action:'approve',item:item},true)
     .then(function(d){
       if(!d.success){ showToast('❌ Gagal: '+(d.error||'Unknown error')); return; }
@@ -219,31 +188,32 @@ function approveItem(idx){
       // Clear ALL cache
       try{ localStorage.removeItem(CACHE_KEY); }catch(e){}
       window._prefetchedTree = null;
-      // Show clear success message
-      var successMsg = d.message || ('✅ ' + item.nama + ' berhasil ' + (item.tipe==='HAPUS'?'dihapus':'ditambahkan/diupdate') + '!');
-      showToast(successMsg);
+      showToast(d.message||'✅ Berhasil disetujui!');
       closeAdminPanel();
-      // Force reload from Supabase immediately
+      // Force reload dari Supabase dengan cache-bust
+      // Ini memastikan semua data terbaru (termasuk foto) langsung tampil
       setTimeout(function(){
         allNodes=[]; nodeMap={}; posMap={}; collapsed=new Set(); hlId=null; maxGen=0;
         var loadingEl=document.getElementById('app-loading');
         if(loadingEl) loadingEl.style.display='flex';
-        fetch('/api/tree?t='+Date.now()) // cache-bust
-          .then(function(r){return r.json();})
+        fetch('/api/tree?t='+Date.now())
+          .then(function(r){ return r.json(); })
           .then(function(d2){
             if(loadingEl) loadingEl.style.display='none';
             if(d2.success && d2.data && d2.data.sebil){
-              try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d2.data}));}catch(e){}
+              try{ localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d2.data})); }catch(e){}
               window.TREE=d2.data;
               initApp(d2.data);
               showToast('🌳 Pohon silsilah berhasil diperbarui!');
+            } else {
+              showToast('⚠️ Data tersimpan tapi gagal reload. Tekan 🔄 untuk refresh.');
             }
           })
           .catch(function(e){
             if(loadingEl) loadingEl.style.display='none';
-            showToast('⚠️ Data tersimpan tapi gagal reload: '+e.message);
+            showToast('⚠️ Data tersimpan. Tekan 🔄 untuk melihat perubahan.');
           });
-      }, 800);
+      }, 600);
     })
     .catch(function(e){ showToast('❌ Gagal approve: '+e.message); });
 }
